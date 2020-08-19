@@ -1,9 +1,7 @@
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 
+// Args[0] is the project root folder
 public class Main {
     public static void main(String[] args) throws IllegalArgumentException, FileNotFoundException {
         if (args.length > 0) {

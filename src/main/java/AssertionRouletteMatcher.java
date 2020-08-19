@@ -17,7 +17,7 @@ public class AssertionRouletteMatcher extends VoidVisitorAdapter<Node> {
         this.findAssertionRoulette();
     }
 
-    // TODO still need to implement if the @Test belongs to JUnit
+    // TODO still need to implement if the @Test belongs to JUnit (?)
     public void findAssertionRoulette() throws FileNotFoundException {
         System.out.println("####");
         System.out.println("Analyzing file " + javaFile);
@@ -31,9 +31,10 @@ public class AssertionRouletteMatcher extends VoidVisitorAdapter<Node> {
                             for (Node node : n.getChildNodes()) {
                                 List<Integer> lines = new LinkedList<>();
                                 if (countAssertions(node.getChildNodes(), 0, lines) >= 2) {
-                                    System.out.println("Found assertion roulette in method " + n.getName() + " in lines " + lines);
+                                    System.out.println("Found assertion roulette in method \"" + n.getName() + "\" in lines " + lines);
                                 }
                             }
+                            break;
                         }
                     }
                 }
