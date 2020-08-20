@@ -1,45 +1,30 @@
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.*;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.sun.tools.javac.util.Log;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
-public class AssertionRouletteMatcher extends VoidVisitorAdapter<Node> {
-    private final File javaFile;
+public class AssertionRouletteMatcher {
 
-    public AssertionRouletteMatcher(File javaFile) throws FileNotFoundException {
-        this.javaFile = javaFile;
-        this.findAssertionRoulette();
-    }
-
-    // TODO still need to implement if the @Test belongs to JUnit (?)
-    public void findAssertionRoulette() throws FileNotFoundException {
-        System.out.println("####");
-        System.out.println("Analyzing file " + javaFile);
-        new VoidVisitorAdapter<>() {
-            @Override
-            public void visit(MethodDeclaration n, Object arg) {
-                super.visit(n, arg);
-                if (n.getAnnotations().size() != 0) {
-                    for (AnnotationExpr annotationExpr : n.getAnnotations()) {
-                        if (annotationExpr.getNameAsString().equals("Test")) {
-                            for (Node node : n.getChildNodes()) {
-                                List<Integer> lines = new LinkedList<>();
-                                if (countAssertions(node.getChildNodes(), 0, lines) >= 2) {
-                                    System.out.println("Found assertion roulette in method \"" + n.getName() + "\" in lines " + lines);
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
+    public void findAssertionRoulette(TestMethod testMethod) {
+        Logger logger = Logger.getLogger(AssertionRouletteMatcher.class.getName());
+        logger.info("Analyzing file " + testMethod.getTestFilePath());
+        for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
+            List<Integer> lines = new LinkedList<>();
+            if (countAssertions(node.getChildNodes(), 0, lines) >= 2) {
+                List<String> toWrite = new LinkedList<>();
+                toWrite.add(OutputWriter.projectName);
+                toWrite.add(testMethod.getTestFilePath());
+                toWrite.add("Assertion Roulette");
+                toWrite.add(testMethod.getMethodDeclaration().getNameAsString());
+                toWrite.add(lines.toString());
+                System.out.println("Found assertion roulette in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
+                String[] itemsArray = new String[toWrite.size()];
+                itemsArray = toWrite.toArray(itemsArray);
+                OutputWriter.csvWriter.writeNext(itemsArray);
             }
-        }.visit(StaticJavaParser.parse(javaFile), null);
+        }
     }
 
     public int countAssertions(List<Node> nodeList, Integer assertionCount, List<Integer> lines) {
