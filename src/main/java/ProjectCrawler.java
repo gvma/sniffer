@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ProjectCrawler {
     private final String rootDirectory;
@@ -25,6 +26,8 @@ public class ProjectCrawler {
                     run(file);
                 } else if (file.isFile()) {
                     if (file.getName().endsWith(".java")) {
+                        Logger logger = Logger.getLogger(Matcher.class.getName());
+                        logger.info("Analyzing file " + file.getAbsolutePath());
                         gatherAllTestMethodsFromFile(file);
                     }
                 }

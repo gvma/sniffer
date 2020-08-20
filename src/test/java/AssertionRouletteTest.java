@@ -7,7 +7,7 @@ public class AssertionRouletteTest {
     @Test
     public void whatever() {
         assertEquals(1, 1);
-        assertEquals(1, 1);
+        assertEquals(2, 2);
     }
 
     @Test
