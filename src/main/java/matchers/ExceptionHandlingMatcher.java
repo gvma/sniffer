@@ -1,26 +1,46 @@
-import com.github.javaparser.ast.Node;
+package matchers;
 
+import com.github.javaparser.ast.Node;
+import utils.OutputWriter;
+import utils.TestClass;
+import utils.TestMethod;
+
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 import java.util.logging.Logger;
 
 public class ExceptionHandlingMatcher {
 
-    public void match(TestMethod testMethod) {
-
-        for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-            List<Integer> lines = new LinkedList<>();
-            if (matchExceptionHandling(node.getChildNodes(), lines)) {
-                OutputWriter.write(testMethod.getTestFilePath(),
-                        "Exception Handling",
-                        testMethod.getMethodDeclaration().getNameAsString(),
-                        lines.toString());
-                Logger.getLogger(ExceptionHandlingMatcher.class.getName()).info("Found exception handling in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
+    public static Runnable match(TestClass testClass, Lock lock) {
+        return () -> {
+            try {
+                lock.lock();
+                for (TestMethod testMethod : testClass.getTestMethods()) {
+                    for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
+                        List<Integer> lines = new LinkedList<>();
+                        if (matchExceptionHandling(node.getChildNodes(), lines)) {
+                            OutputWriter.write(testMethod.getTestFilePath(),
+                                    "Exception Handling",
+                                    testMethod.getMethodDeclaration().getNameAsString(),
+                                    lines.toString());
+                            Logger.getLogger(ExceptionHandlingMatcher.class.getName()).info("Found exception handling in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
+                            try {
+                                OutputWriter.csvWriter.flush();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            } finally {
+                lock.unlock();
             }
-        }
+        };
     }
 
-    private boolean matchExceptionHandling(List<Node> nodeList, List<Integer> lines) {
+    private static boolean matchExceptionHandling(List<Node> nodeList, List<Integer> lines) {
         if (nodeList.size() > 0) {
             Node lastNode = nodeList.get(nodeList.size() - 1);
             if (lastNode.getMetaModel().getTypeName().equals("TryStmt")) {

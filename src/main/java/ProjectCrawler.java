@@ -1,7 +1,10 @@
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import utils.TestClass;
+import utils.TestMethod;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,15 +13,19 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class ProjectCrawler {
-    private final String rootDirectory;
-    private final List<TestMethod> testMethods;
+    private final List<TestClass> testClasses;
+    private final File rootFile;
 
     public ProjectCrawler(String rootDirectory) {
-        this.rootDirectory = rootDirectory;
-        this.testMethods = new LinkedList<>();
+        this.testClasses = new LinkedList<>();
+        this.rootFile = new File(rootDirectory);
     }
 
-    public void run(File rootFile) throws FileNotFoundException {
+    public void run() throws FileNotFoundException {
+        run(rootFile);
+    }
+
+    private void run(File rootFile) throws FileNotFoundException {
         File[] listedFiles = rootFile.listFiles();
         if (listedFiles != null) {
             for (File file : listedFiles) {
@@ -28,14 +35,17 @@ public class ProjectCrawler {
                     if (file.getName().endsWith(".java")) {
                         Logger logger = Logger.getLogger(Matcher.class.getName());
                         logger.info("Analyzing file " + file.getAbsolutePath());
-                        gatherAllTestMethodsFromFile(file);
+                        List<TestMethod> testMethods = gatherAllTestMethodsFromFile(new LinkedList<>(), file);
+                        if (testMethods.size() > 0) {
+                            testClasses.add(new TestClass(testMethods, file.getName(), StaticJavaParser.parse(file).toString()));
+                        }
                     }
                 }
             }
         }
     }
 
-    public void gatherAllTestMethodsFromFile(File javaFile) throws FileNotFoundException {
+    public List<TestMethod> gatherAllTestMethodsFromFile(List<TestMethod> testMethods, File javaFile) throws FileNotFoundException {
         new VoidVisitorAdapter<Object>() {
             @Override
             public void visit(MethodDeclaration n, Object arg) {
@@ -54,13 +64,10 @@ public class ProjectCrawler {
                 }
             }
         }.visit(StaticJavaParser.parse(javaFile), null);
-    }
-
-    public String getRootDirectory() {
-        return rootDirectory;
-    }
-
-    public List<TestMethod> getTestMethods() {
         return testMethods;
+    }
+
+    public List<TestClass> getTestClasses() {
+        return testClasses;
     }
 }
