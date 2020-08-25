@@ -1,23 +1,40 @@
-import com.github.javaparser.ast.Node;
+package matchers;
 
+import com.github.javaparser.ast.Node;
+import utils.OutputWriter;
+import utils.TestClass;
+import utils.TestMethod;
+
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-public class ExceptionHandlingMatcher {
+public class ExceptionHandlingMatcher extends SmellMatcher {
 
-    public void match(TestMethod testMethod) {
-
-        for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-            List<Integer> lines = new LinkedList<>();
-            if (matchExceptionHandling(node.getChildNodes(), lines)) {
-                OutputWriter.write(testMethod.getTestFilePath(),
-                        "Exception Handling",
-                        testMethod.getMethodDeclaration().getNameAsString(),
-                        lines.toString());
-                Logger.getLogger(ExceptionHandlingMatcher.class.getName()).info("Found exception handling in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
+    @Override
+    protected Callable<?> match(TestClass testClass) {
+        return () -> {
+            for (TestMethod testMethod : testClass.getTestMethods()) {
+                for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
+                    List<Integer> lines = new LinkedList<>();
+                    if (matchExceptionHandling(node.getChildNodes(), lines)) {
+                        OutputWriter.write(testMethod.getTestFilePath(),
+                                "Exception Handling",
+                                testMethod.getMethodDeclaration().getNameAsString(),
+                                lines.toString());
+                        Logger.getLogger(ExceptionHandlingMatcher.class.getName()).info("Found exception handling in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
+                        try {
+                            OutputWriter.csvWriter.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
-        }
+            return null;
+        };
     }
 
     private boolean matchExceptionHandling(List<Node> nodeList, List<Integer> lines) {

@@ -1,3 +1,5 @@
+package utils;
+
 import com.opencsv.CSVWriter;
 
 import java.io.FileWriter;
@@ -9,8 +11,8 @@ public class OutputWriter {
     public static CSVWriter csvWriter;
     public static String projectName;
 
-    public OutputWriter(String projectPath) {
-        String regex = "";
+    public static void init(String projectPath) {
+        String regex;
         if (System.getProperty("file.separator").equals("/")) {
             regex = "/";
         } else {
@@ -23,7 +25,7 @@ public class OutputWriter {
             csvWriter = new CSVWriter(new FileWriter(System.getProperty("user.dir")
                     + System.getProperty("file.separator")
                     + OutputWriter.projectName + "_output.csv"));
-            csvWriter.writeNext(new String[]{"Project", "Absolute Path", "Test Smell", "Method Name", "Lines"});
+            csvWriter.writeNext(new String[]{"Project", "Absolute Path", "Test Smell", "Method Name", "Lines"}, true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -38,6 +40,6 @@ public class OutputWriter {
         toWrite.add(lines);
         String[] itemsArray = new String[toWrite.size()];
         itemsArray = toWrite.toArray(itemsArray);
-        csvWriter.writeNext(itemsArray);
+        csvWriter.writeNext(itemsArray, true);
     }
 }

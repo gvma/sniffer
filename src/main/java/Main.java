@@ -1,17 +1,11 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import matchers.Sniffer;
 
 // Args[0] is the project root folder
 public class Main {
-    public static void main(String[] args) throws IllegalArgumentException, IOException {
+    public synchronized static void main(String[] args) throws Exception {
         if (args.length > 0) {
-            ProjectCrawler projectCrawler = new ProjectCrawler(args[0]);
-            projectCrawler.run(new File(projectCrawler.getRootDirectory()));
-            OutputWriter outputWriter = new OutputWriter(args[0]);
-            Matcher matcher = new Matcher();
-            matcher.match(projectCrawler.getTestMethods());
-            OutputWriter.csvWriter.close();
+            Sniffer sniffer = new Sniffer(args[0]);
+            sniffer.sniff();
         } else {
             throw new IllegalArgumentException("You must provide a correct file path with a java project!");
         }

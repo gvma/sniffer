@@ -1,3 +1,5 @@
+package utils;
+
 import com.github.javaparser.ast.body.MethodDeclaration;
 
 public class TestMethod {
@@ -37,7 +39,7 @@ public class TestMethod {
 
     @Override
     public String toString() {
-        return "\nTestMethod {\n" +
+        return "\nutils.TestMethod {\n" +
                 "\tbeginLine=" + beginLine + ",\n" +
                 "\tendLine=" + endLine + ",\n" +
                 "\ttestFilePath='" + testFilePath + '\'' + ",\n" +
