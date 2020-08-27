@@ -15,7 +15,7 @@ public class Sniffer {
     private final ProjectCrawler projectCrawler;
 
     public Sniffer(String projectPath) throws FileNotFoundException {
-        OutputWriter.init(projectPath);
+        OutputWriter.getInstance().setOutputFile(projectPath);
         this.projectCrawler = new ProjectCrawler(projectPath);
         projectCrawler.run();
         matchers = new LinkedList<>();
