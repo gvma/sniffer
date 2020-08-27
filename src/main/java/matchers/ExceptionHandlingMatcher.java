@@ -20,7 +20,7 @@ public class ExceptionHandlingMatcher extends SmellMatcher {
                 for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
                     List<Integer> lines = new LinkedList<>();
                     if (matchExceptionHandling(node.getChildNodes(), lines)) {
-                        OutputWriter.write(testMethod.getTestFilePath(),
+                        OutputWriter.getInstance().write(testMethod.getTestFilePath(),
                                 "Exception Handling",
                                 testMethod.getMethodDeclaration().getNameAsString(),
                                 lines.toString());

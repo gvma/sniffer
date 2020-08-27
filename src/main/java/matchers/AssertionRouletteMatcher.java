@@ -20,7 +20,7 @@ public final class AssertionRouletteMatcher extends SmellMatcher {
                 for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
                     List<Integer> lines = new LinkedList<>();
                     if (matchAssertionRoulette(node.getChildNodes(), 0, lines) >= 2) {
-                        OutputWriter.write(testMethod.getTestFilePath(),
+                        OutputWriter.getInstance().write(testMethod.getTestFilePath(),
                                 "Assertion Roulette",
                                 testMethod.getMethodDeclaration().getNameAsString(),
                                 lines.toString());

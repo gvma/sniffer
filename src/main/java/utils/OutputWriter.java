@@ -10,8 +10,24 @@ import java.util.List;
 public class OutputWriter {
     public static CSVWriter csvWriter;
     public static String projectName;
+    private static volatile OutputWriter instance;
 
-    public static void init(String projectPath) {
+    private OutputWriter() {}
+
+    public static OutputWriter getInstance() {
+        OutputWriter result = instance;
+        if (result != null) {
+            return result;
+        }
+        synchronized (OutputWriter.class) {
+            if (instance == null) {
+                instance = new OutputWriter();
+            }
+            return instance;
+        }
+    }
+
+    public void setOutputFile(String projectPath) {
         String regex;
         if (System.getProperty("file.separator").equals("/")) {
             regex = "/";
@@ -20,7 +36,10 @@ public class OutputWriter {
         }
         String[] splitted = projectPath.split(regex);
         OutputWriter.projectName = splitted[splitted.length - 1];
+        writeFirstCSVRow();
+    }
 
+    private void writeFirstCSVRow() {
         try {
             csvWriter = new CSVWriter(new FileWriter(System.getProperty("user.dir")
                     + System.getProperty("file.separator")
@@ -31,7 +50,7 @@ public class OutputWriter {
         }
     }
 
-    public static void write(String filePath, String testSmell, String methodName, String lines) {
+    public void write(String filePath, String testSmell, String methodName, String lines) {
         List<String> toWrite = new LinkedList<>();
         toWrite.add(projectName);
         toWrite.add(filePath);
