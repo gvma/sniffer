@@ -1,12 +1,15 @@
 package matchers;
 
+import org.reflections.Reflections;
 import projectCrawler.ProjectCrawler;
 import utils.OutputWriter;
 import utils.TestClass;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 public class Sniffer {
@@ -19,31 +22,16 @@ public class Sniffer {
         this.projectCrawler = new ProjectCrawler(projectPath);
         projectCrawler.run();
         matchers = new LinkedList<>();
-        registerDefaultMatchers();
-    }
-
-    public void addCustomSmellMatchers(List<SmellMatcher> smellMatcherList) {
-        for (SmellMatcher smellMatcher : smellMatcherList) {
-            addCustomSmellMatcher(smellMatcher);
-        }
-    }
-
-    public void addCustomSmellMatcher(SmellMatcher smellMatcher) {
-        for (TestClass testClass : projectCrawler.getTestClasses()) {
-            matchers.add(smellMatcher.match(testClass));
-        }
-    }
-
-    private void registerDefaultMatchers() {
-        for (TestClass testClass : projectCrawler.getTestClasses()) {
-            matchers.add(new AssertionRouletteMatcher().match(testClass));
-            matchers.add(new ExceptionHandlingMatcher().match(testClass));
-        }
     }
 
     public void sniff() throws Exception {
-        for (Callable<?> callable : matchers) {
-            callable.call();
+        Set<Class<? extends SmellMatcher>> classes = new Reflections("").getSubTypesOf(SmellMatcher.class);
+        for (Class<? extends SmellMatcher> clazz : classes) {
+            Method match = clazz.getDeclaredMethod("match", TestClass.class);
+            match.setAccessible(true);
+            for (TestClass testClass : projectCrawler.getTestClasses()) {
+                match.invoke(clazz.getDeclaredConstructor().newInstance(), testClass);
+            }
         }
         OutputWriter.csvWriter.close();
     }

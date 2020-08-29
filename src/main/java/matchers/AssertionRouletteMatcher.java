@@ -8,33 +8,29 @@ import utils.TestMethod;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 public final class AssertionRouletteMatcher extends SmellMatcher {
 
     @Override
-    protected Callable<?> match(TestClass testClass) {
-        return () -> {
-            for (TestMethod testMethod : testClass.getTestMethods()) {
-                for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-                    List<Integer> lines = new LinkedList<>();
-                    if (matchAssertionRoulette(node.getChildNodes(), 0, lines) >= 2) {
-                        OutputWriter.getInstance().write(testMethod.getTestFilePath(),
-                                "Assertion Roulette",
-                                testMethod.getMethodDeclaration().getNameAsString(),
-                                lines.toString());
-                        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found assertion roulette in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
-                        try {
-                            OutputWriter.csvWriter.flush();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+    protected void match(TestClass testClass) {
+        for (TestMethod testMethod : testClass.getTestMethods()) {
+            for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
+                List<Integer> lines = new LinkedList<>();
+                if (matchAssertionRoulette(node.getChildNodes(), 0, lines) >= 2) {
+                    OutputWriter.getInstance().write(testMethod.getTestFilePath(),
+                            "Assertion Roulette",
+                            testMethod.getMethodDeclaration().getNameAsString(),
+                            lines.toString());
+                    Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found assertion roulette in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
+                    try {
+                        OutputWriter.csvWriter.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
-            return null;
-        };
+        }
     }
 
     private int matchAssertionRoulette(List<Node> nodeList, Integer assertionCount, List<Integer> lines) {

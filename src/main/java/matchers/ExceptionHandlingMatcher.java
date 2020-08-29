@@ -8,33 +8,29 @@ import utils.TestMethod;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 public class ExceptionHandlingMatcher extends SmellMatcher {
 
     @Override
-    protected Callable<?> match(TestClass testClass) {
-        return () -> {
-            for (TestMethod testMethod : testClass.getTestMethods()) {
-                for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-                    List<Integer> lines = new LinkedList<>();
-                    if (matchExceptionHandling(node.getChildNodes(), lines)) {
-                        OutputWriter.getInstance().write(testMethod.getTestFilePath(),
-                                "Exception Handling",
-                                testMethod.getMethodDeclaration().getNameAsString(),
-                                lines.toString());
-                        Logger.getLogger(ExceptionHandlingMatcher.class.getName()).info("Found exception handling in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
-                        try {
-                            OutputWriter.csvWriter.flush();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+    protected void match(TestClass testClass) {
+        for (TestMethod testMethod : testClass.getTestMethods()) {
+            for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
+                List<Integer> lines = new LinkedList<>();
+                if (matchExceptionHandling(node.getChildNodes(), lines)) {
+                    OutputWriter.getInstance().write(testMethod.getTestFilePath(),
+                            "Exception Handling",
+                            testMethod.getMethodDeclaration().getNameAsString(),
+                            lines.toString());
+                    Logger.getLogger(ExceptionHandlingMatcher.class.getName()).info("Found exception handling in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
+                    try {
+                        OutputWriter.csvWriter.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
-            return null;
-        };
+        }
     }
 
     private boolean matchExceptionHandling(List<Node> nodeList, List<Integer> lines) {
