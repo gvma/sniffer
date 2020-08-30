@@ -30,4 +30,10 @@ public class MagicNumberTest {
         int a = 0;
         assertEquals(a, a, a);
     }
+
+    @Test
+    public void magicNumberTest5() {
+        double a = 1.0;
+        assertEquals(Math.pow(1, 1), a, a);
+    }
 }
