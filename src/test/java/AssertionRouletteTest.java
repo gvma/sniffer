@@ -5,17 +5,22 @@ import static org.junit.Assert.assertEquals;
 public class AssertionRouletteTest {
 
     @Test
-    public void whatever() {
-        assertEquals(1, 1);
-        assertEquals(2, 2);
+    public void whatever1() {
+        int a = 0;
+        assertEquals(a, a);
+        assertEquals(a, a);
     }
 
     @Test
     public void whatever2() {
-        assertEquals(1, 1);
+        int a = 0;
+        assertEquals(a, a);
+        assertEquals(a, a);
     }
 
+    @Test
     public void whatever3() {
-        assertEquals(1, 1);
+        int a = 0;
+        assertEquals(a, a);
     }
 }
