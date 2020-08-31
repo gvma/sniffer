@@ -18,11 +18,7 @@ public class ExceptionHandlingMatcher extends SmellMatcher {
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
                 List<Integer> lines = new LinkedList<>();
                 if (matchExceptionHandling(node.getChildNodes(), lines)) {
-                    OutputWriter.getInstance().write(testMethod.getTestFilePath(),
-                            "Exception Handling",
-                            testMethod.getMethodDeclaration().getNameAsString(),
-                            lines.toString());
-                    Logger.getLogger(ExceptionHandlingMatcher.class.getName()).info("Found exception handling in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
+                    write(testMethod.getTestFilePath(), "Exception Handling", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
                     try {
                         OutputWriter.csvWriter.flush();
                     } catch (IOException e) {
@@ -31,6 +27,12 @@ public class ExceptionHandlingMatcher extends SmellMatcher {
                 }
             }
         }
+    }
+
+    @Override
+    public void write(String filePath, String testSmell, String methodName, String lines) {
+        OutputWriter.getInstance().write(filePath, testSmell, methodName, lines);
+        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found exception handling in method \"" + methodName + "\" in lines " + lines);
     }
 
     private boolean matchExceptionHandling(List<Node> nodeList, List<Integer> lines) {

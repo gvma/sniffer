@@ -17,7 +17,8 @@ public class ExceptionHandlingTest {
     @Test
     public void exceptionHandlingTest1() {
         try {
-            assertEquals(1, 1);
+            int a = 0;
+            assertEquals(a, a);
         } catch (Exception e) {
         }
     }
@@ -26,7 +27,8 @@ public class ExceptionHandlingTest {
     public void exceptionHandlingTest2() {
         try {
         } catch (Exception e) {
-            assertEquals(1, 1);
+            int a = 0;
+            assertEquals(a, a);
         }
     }
 
@@ -58,6 +60,17 @@ public class ExceptionHandlingTest {
     @Test
     public void exceptionHandlingTest6() {
         int a = 0;
+        try {
+            fail();
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void exceptionHandlingTest7() {
+        for (int i = 0; i < 1; ++i) {
+            int a = 0;
+        }
         try {
             fail();
         } catch (Exception e) {
