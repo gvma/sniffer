@@ -17,7 +17,6 @@ public class UnknownTestMatcher extends SmellMatcher {
     protected void match(TestClass testClass) {
         for (TestMethod testMethod : testClass.getTestMethods()) {
             matchUnknownTest(testMethod.getMethodDeclaration().getChildNodes());
-            System.out.println(assertionCount);
             if (assertionCount == 0) {
                 write(testMethod.getTestFilePath(), "Unknown Test", testMethod.getMethodDeclaration().getNameAsString(), Integer.toString(testMethod.getBeginLine()));
             }
