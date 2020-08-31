@@ -17,6 +17,10 @@ public class TestClass {
         return testMethods;
     }
 
+    public String getClassName() {
+        return className;
+    }
+
     @Override
     public String toString() {
         return "TestClass{" +

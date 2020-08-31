@@ -2,6 +2,7 @@ package matchers;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.LiteralExpr;
+import com.github.javaparser.ast.visitor.TreeVisitor;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -21,35 +22,34 @@ public class MagicNumberMatcher extends SmellMatcher {
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
                 matchMagicNumber(node.getChildNodes(), lines);
                 if (lines.size() > 0) {
-                    OutputWriter.getInstance().write(testMethod.getTestFilePath(),
-                            "Magic Number",
-                            testMethod.getMethodDeclaration().getNameAsString(),
-                            lines.toString());
-                    Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found magic number in method \"" + testMethod.getMethodDeclaration().getName() + "\" in lines " + lines);
+                    write(testMethod.getTestFilePath(), "Magic Number", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
                 }
             }
         }
     }
 
+    @Override
+    public void write(String filePath, String testSmell, String methodName, String lines) {
+        OutputWriter.getInstance().write(filePath, testSmell, methodName, lines);
+        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found magic number in method \"" + methodName + "\" in lines " + lines);
+    }
+
     private void matchMagicNumber(List<Node> nodeList, Set<Integer> lines) {
         for (Node node : nodeList) {
-            if (node.getMetaModel().getTypeName().equals("ExpressionStmt")) {
-                if (node.toString().startsWith("Assert")
-                    || node.toString().startsWith("assert")) {
-                    for (Node n1 : node.getChildNodes()) {
-                        for (Node n2 : n1.getChildNodes()) {
-                            if (n2.getMetaModel().getTypeName().endsWith("LiteralExpr")) {
-                                lines.add(node.getRange().get().begin.line);
+            new TreeVisitor() {
+                @Override
+                public void process(Node node) {
+                    if (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert")) {
+                        for (Node n1 : node.getChildNodes()) {
+                            for (Node n2 : n1.getChildNodes()) {
+                                if (n2.getMetaModel().getTypeName().endsWith("LiteralExpr")) {
+                                    lines.add(node.getRange().get().begin.line);
+                                }
                             }
                         }
                     }
                 }
-            }
-            if (node.getChildNodes().size() == 0) {
-                return;
-            } else {
-                matchMagicNumber(node.getChildNodes(), lines);
-            }
+            }.visitPreOrder(node);
         }
     }
 }
