@@ -6,28 +6,22 @@ import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
-public final class AssertionRouletteMatcher extends SmellMatcher {
+public class UnknownTestMatcher extends SmellMatcher {
 
     private Integer assertionCount = 0;
 
     @Override
     protected void match(TestClass testClass) {
         for (TestMethod testMethod : testClass.getTestMethods()) {
-            for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-                Set<Integer> lines = new HashSet<>();
-                matchAssertionRoulette(node.getChildNodes(), lines);
-                if (assertionCount >= 2) {
-                    write(testMethod.getTestFilePath(), "Assertion Roulette", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
-                }
-                assertionCount = 0;
+            matchUnknownTest(testMethod.getMethodDeclaration().getChildNodes());
+            System.out.println(assertionCount);
+            if (assertionCount == 0) {
+                write(testMethod.getTestFilePath(), "Unknown Test", testMethod.getMethodDeclaration().getNameAsString(), Integer.toString(testMethod.getBeginLine()));
             }
+            assertionCount = 0;
         }
     }
 
@@ -37,19 +31,18 @@ public final class AssertionRouletteMatcher extends SmellMatcher {
         Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found assertion roulette in method \"" + methodName + "\" in lines " + lines);
     }
 
-    private void matchAssertionRoulette(List<Node> nodeList, Set<Integer> lines) {
+    private void matchUnknownTest(List<Node> nodeList) {
         for (Node node : nodeList) {
             new TreeVisitor() {
                 @Override
                 public void process(Node node) {
-                    if (!lines.contains(node.getRange().get().begin.line) &&
-                            (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert"))) {
+                    if (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert")) {
                         assertionCount++;
-                        lines.add(node.getRange().get().begin.line);
+                    } else if (node.toString().trim().startsWith("fail")) {
+                        assertionCount++;
                     }
                 }
             }.visitPreOrder(node);
         }
     }
-
 }

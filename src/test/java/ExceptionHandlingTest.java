@@ -65,4 +65,15 @@ public class ExceptionHandlingTest {
         } catch (Exception e) {
         }
     }
+
+    @Test
+    public void exceptionHandlingTest7() {
+        for (int i = 0; i < 1; ++i) {
+            int a = 0;
+        }
+        try {
+            fail();
+        } catch (Exception e) {
+        }
+    }
 }
