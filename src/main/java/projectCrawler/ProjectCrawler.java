@@ -1,5 +1,6 @@
 package projectCrawler;
 
+import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -47,25 +48,31 @@ public class ProjectCrawler {
         }
     }
 
-    public List<TestMethod> gatherAllTestMethodsFromFile(List<TestMethod> testMethods, File javaFile) throws FileNotFoundException {
-        new VoidVisitorAdapter<Object>() {
-            @Override
-            public void visit(MethodDeclaration n, Object arg) {
-                super.visit(n, arg);
-                if (n.getAnnotations().size() != 0) {
-                    for (AnnotationExpr annotationExpr : n.getAnnotations()) {
-                        if (annotationExpr.getNameAsString().equals("Test")) {
-                            testMethods.add(new TestMethod(n.getRange().get().begin.line,
-                                    n.getRange().get().end.line,
-                                    n.getNameAsString(),
-                                    n.asMethodDeclaration(),
-                                    javaFile.getAbsolutePath()));
-                            break;
+    public List<TestMethod> gatherAllTestMethodsFromFile(List<TestMethod> testMethods, File javaFile) throws FileNotFoundException, ParseProblemException {
+        try {
+            new VoidVisitorAdapter<>() {
+                @Override
+                public void visit(MethodDeclaration n, Object arg) {
+                    super.visit(n, arg);
+                    if (n.getAnnotations().size() != 0) {
+                        for (AnnotationExpr annotationExpr : n.getAnnotations()) {
+                            if (annotationExpr.getNameAsString().equals("Test")) {
+                                if (n.getRange().isPresent()) {
+                                    testMethods.add(new TestMethod(n.getRange().get().begin.line,
+                                            n.getRange().get().end.line,
+                                            n.getNameAsString(),
+                                            n.asMethodDeclaration(),
+                                            javaFile.getAbsolutePath()));
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }.visit(StaticJavaParser.parse(javaFile), null);
+            }.visit(StaticJavaParser.parse(javaFile), null);
+        } catch (ParseProblemException e) {
+            return new LinkedList<>();
+        }
         return testMethods;
     }
 

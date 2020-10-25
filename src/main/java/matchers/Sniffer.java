@@ -14,14 +14,12 @@ import java.util.concurrent.Callable;
 
 public class Sniffer {
 
-    private final List<Callable<?>> matchers;
     private final ProjectCrawler projectCrawler;
 
     public Sniffer(String projectPath) throws FileNotFoundException {
         OutputWriter.getInstance().setOutputFile(projectPath);
         this.projectCrawler = new ProjectCrawler(projectPath);
         projectCrawler.run();
-        matchers = new LinkedList<>();
     }
 
     public void sniff() throws Exception {
