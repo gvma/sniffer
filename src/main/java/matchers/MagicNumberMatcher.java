@@ -41,9 +41,22 @@ public class MagicNumberMatcher extends SmellMatcher {
                 public void process(Node node) {
                     if (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert")) {
                         for (Node n1 : node.getChildNodes()) {
+                            if (n1.getMetaModel().getTypeName().equals("ArrayAccessExpr")) {
+                                continue;
+                            }
                             for (Node n2 : n1.getChildNodes()) {
-                                if (n2.getMetaModel().getTypeName().endsWith("LiteralExpr")) {
-                                    lines.add(node.getRange().get().begin.line);
+                                if (!n2.getMetaModel().getTypeName().equals("MethodCallExpr")) {
+                                    if (n2.getMetaModel().getTypeName().endsWith("LiteralExpr")) {
+                                        if (!n2.toString().startsWith("\"")
+                                                && !n2.toString().startsWith("'")
+                                                && !n2.toString().equals("true")
+                                                && !n2.toString().equals("false")
+                                                && !n2.toString().equals("null")) {
+                                            if (node.getRange().isPresent()) {
+                                                lines.add(node.getRange().get().begin.line);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -51,5 +64,20 @@ public class MagicNumberMatcher extends SmellMatcher {
                 }
             }.visitPreOrder(node);
         }
+    }
+
+    public boolean isMagicNumber(Node root) {
+        for (Node n2 : root.getChildNodes()) {
+            if (n2.getMetaModel().getTypeName().endsWith("LiteralExpr")) {
+                if (!n2.toString().startsWith("\"")
+                        && !n2.toString().startsWith("'")
+                        && !n2.toString().equals("true")
+                        && !n2.toString().equals("false")
+                        && !n2.toString().equals("null")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

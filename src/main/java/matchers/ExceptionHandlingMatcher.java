@@ -41,12 +41,13 @@ public class ExceptionHandlingMatcher extends SmellMatcher {
                         for (Node tryBlockChild : node.getChildNodes()) {
                             if (tryBlockChild.getMetaModel().getTypeName().equals("BlockStmt")) {
                                 for (Node blockStmtChild : tryBlockChild.getChildNodes()) {
-                                    System.out.println("Node: " + blockStmtChild + " and type: " + blockStmtChild.getMetaModel().getTypeName());
                                     if (blockStmtChild.getMetaModel().getTypeName().equals("ExpressionStmt")) {
-                                        System.out.println(blockStmtChild.toString().trim().startsWith("fail"));
                                         if (blockStmtChild.toString().trim().startsWith("Assert")
                                                 || blockStmtChild.toString().trim().startsWith("assert")
-                                                || blockStmtChild.toString().trim().startsWith("fail")) {
+                                                || blockStmtChild.toString().trim().endsWith("Assert")
+                                                || blockStmtChild.toString().trim().endsWith("assert")
+                                                || blockStmtChild.toString().trim().startsWith("fail")
+                                                || blockStmtChild.toString().trim().endsWith("fail")) {
                                             isExceptionHandling[0] = true;
 
                                         }
@@ -68,7 +69,6 @@ public class ExceptionHandlingMatcher extends SmellMatcher {
                                 }
                             }
                         }
-                        System.out.println("\n\n\n\n");
                     }
                 }
             }.visitPreOrder(node);
