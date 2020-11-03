@@ -32,6 +32,11 @@ public class UnknownTestMatcher extends SmellMatcher {
 
     private void matchUnknownTest(List<Node> nodeList) {
         for (Node node : nodeList) {
+            if (node.getMetaModel().getTypeName().equals("NormalAnnotationExpr")) {
+                if (node.toString().contains("expected")) {
+                    assertionCount++;
+                }
+            }
             new TreeVisitor() {
                 @Override
                 public void process(Node node) {

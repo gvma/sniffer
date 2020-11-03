@@ -21,7 +21,7 @@ public final class AssertionRouletteMatcher extends SmellMatcher {
     protected void match(TestClass testClass) {
         for (TestMethod testMethod : testClass.getTestMethods()) {
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-                Set<Integer> lines = new HashSet<>();
+                List<Integer> lines = new LinkedList<>();
                 matchAssertionRoulette(node.getChildNodes(), lines);
                 if (assertionCount >= 2) {
                     write(testMethod.getTestFilePath(), "Assertion Roulette", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
@@ -37,15 +37,17 @@ public final class AssertionRouletteMatcher extends SmellMatcher {
         Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found assertion roulette in method \"" + methodName + "\" in lines " + lines);
     }
 
-    private void matchAssertionRoulette(List<Node> nodeList, Set<Integer> lines) {
+    private void matchAssertionRoulette(List<Node> nodeList, List<Integer> lines) {
         for (Node node : nodeList) {
             new TreeVisitor() {
                 @Override
                 public void process(Node node) {
-                    if (!lines.contains(node.getRange().get().begin.line) &&
-                            (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert"))) {
-                        assertionCount++;
-                        lines.add(node.getRange().get().begin.line);
+                    if (node.getRange().isPresent()) {
+                        if (!lines.contains(node.getRange().get().begin.line) &&
+                                (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert"))) {
+                            assertionCount++;
+                            lines.add(node.getRange().get().begin.line);
+                        }
                     }
                 }
             }.visitPreOrder(node);
