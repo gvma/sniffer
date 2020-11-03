@@ -3,21 +3,26 @@ import org.junit.Test;
 public class UnknownTestTest {
 
     @Test
-    public void unkownTest1() {
+    public void unknownTestTrue1() {
 
     }
 
     @Test
-    public void unkownTest2() {
+    public void unknownTestTrue2() {
         for (int i = 0; i < 1; ++i) {
 
         }
     }
 
     @Test
-    public void unkownTest3() {
+    public void unknownTestTrue3() {
         while (true) {
 
         }
+    }
+
+    @Test(expected = Exception.class)
+    public void unknownTestAnnotationParamTrue() throws Exception {
+        throw new Exception();
     }
 }
