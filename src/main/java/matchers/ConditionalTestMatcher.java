@@ -21,7 +21,7 @@ public class ConditionalTestMatcher extends SmellMatcher {
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
                 List<Integer> lines = new LinkedList<>();
                 matchConditionalTest(node.getChildNodes(), lines);
-                if (lines.size() != 0) {
+                if (!lines.isEmpty()) {
                     write(testMethod.getTestFilePath(), "Conditional Test", testMethod.getMethodDeclaration().getNameAsString(), Integer.toString(testMethod.getBeginLine()));
                 }
             }
