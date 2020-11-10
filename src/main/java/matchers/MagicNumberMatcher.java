@@ -65,19 +65,4 @@ public class MagicNumberMatcher extends SmellMatcher {
             }.visitPreOrder(node);
         }
     }
-
-    public boolean isMagicNumber(Node root) {
-        for (Node n2 : root.getChildNodes()) {
-            if (n2.getMetaModel().getTypeName().endsWith("LiteralExpr")) {
-                if (!n2.toString().startsWith("\"")
-                        && !n2.toString().startsWith("'")
-                        && !n2.toString().equals("true")
-                        && !n2.toString().equals("false")
-                        && !n2.toString().equals("null")) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }

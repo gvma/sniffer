@@ -22,7 +22,7 @@ public class UnknownTestTest {
     }
 
     @Test(expected = Exception.class)
-    public void unknownTestAnnotationParamTrue() throws Exception {
+    public void unknownTestAnnotationParamFalse() throws Exception {
         throw new Exception();
     }
 }

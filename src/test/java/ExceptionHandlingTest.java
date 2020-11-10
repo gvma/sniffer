@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 public class ExceptionHandlingTest {
 
     @Test
-    public void exceptionHandlingTest() {
+    public void exceptionHandlingTestFalse1() {
         try {
 
         } catch (Exception e) {
@@ -15,7 +15,7 @@ public class ExceptionHandlingTest {
     }
 
     @Test
-    public void exceptionHandlingTest1() {
+    public void exceptionHandlingTestTrue1() {
         try {
             int a = 0;
             assertEquals(a, a);
@@ -24,7 +24,7 @@ public class ExceptionHandlingTest {
     }
 
     @Test
-    public void exceptionHandlingTest2() {
+    public void exceptionHandlingTestTrue2() {
         try {
         } catch (Exception e) {
             int a = 0;
@@ -33,7 +33,7 @@ public class ExceptionHandlingTest {
     }
 
     @Test
-    public void exceptionHandlingTest3() {
+    public void exceptionHandlingTestTrue3() {
         try {
         } catch (Exception e) {
             fail();
@@ -41,7 +41,7 @@ public class ExceptionHandlingTest {
     }
 
     @Test
-    public void exceptionHandlingTest4() {
+    public void exceptionHandlingTestTrue4() {
         try {
             fail();
         } catch (Exception e) {
@@ -49,7 +49,7 @@ public class ExceptionHandlingTest {
     }
 
     @Test
-    public void exceptionHandlingTest5() {
+    public void exceptionHandlingTestTrue5() {
         try {
             fail();
         } catch (Exception e) {
@@ -58,7 +58,7 @@ public class ExceptionHandlingTest {
     }
 
     @Test
-    public void exceptionHandlingTest6() {
+    public void exceptionHandlingTestTrue6() {
         int a = 0;
         try {
             fail();
@@ -67,7 +67,7 @@ public class ExceptionHandlingTest {
     }
 
     @Test
-    public void exceptionHandlingTest7() {
+    public void exceptionHandlingTestTrue7() {
         for (int i = 0; i < 1; ++i) {
             int a = 0;
         }
