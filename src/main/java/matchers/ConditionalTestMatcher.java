@@ -9,8 +9,10 @@ import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class ConditionalTestMatcher extends SmellMatcher {
@@ -19,10 +21,10 @@ public class ConditionalTestMatcher extends SmellMatcher {
     protected void match(TestClass testClass) {
         for (TestMethod testMethod : testClass.getTestMethods()) {
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-                List<Integer> lines = new LinkedList<>();
+                Set<Integer> lines = new HashSet<>();
                 matchConditionalTest(node.getChildNodes(), lines);
                 if (lines.size() != 0) {
-                    write(testMethod.getTestFilePath(), "Conditional Test", testMethod.getMethodDeclaration().getNameAsString(), Integer.toString(testMethod.getBeginLine()));
+                    write(testMethod.getTestFilePath(), "Conditional Test", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
                 }
             }
         }
@@ -34,7 +36,7 @@ public class ConditionalTestMatcher extends SmellMatcher {
         Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found conditional test in method \"" + methodName + "\" in lines " + lines);
     }
 
-    private void matchConditionalTest(List<Node> nodeList, List<Integer> lines) {
+    private void matchConditionalTest(List<Node> nodeList, Set<Integer> lines) {
         for (Node node : nodeList) {
             new TreeVisitor() {
                 @Override

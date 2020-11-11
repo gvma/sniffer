@@ -43,19 +43,23 @@ public class DuplicateAssertMatcher extends SmellMatcher {
     }
 
     private void getAllAsserts(List<Node> nodeList, Map<String, List<Integer>> allAsserts) {
+        List<Node> nodes = new LinkedList<>();
         for (Node node : nodeList) {
             new TreeVisitor() {
                 @Override
                 public void process(Node node) {
                     if (node.getRange().isPresent()) {
-                        if (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert")) {
-                            if (node.getRange().isPresent()) {
-                                allAsserts.computeIfAbsent(node.toString().trim(), k -> new LinkedList<>());
-                                List<Integer> lines = allAsserts.get(node.toString());
-                                if (!lines.contains(node.getRange().get().begin.line)) {
-                                    lines.add(node.getRange().get().begin.line);
+                        if (node.getMetaModel().getTypeName().equals("ExpressionStmt")) {
+                            if (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert")) {
+                                if (node.getRange().isPresent()) {
+                                    allAsserts.computeIfAbsent(node.toString().trim(), k -> new LinkedList<>());
+                                    List<Integer> lines = allAsserts.get(node.toString());
+                                    if (!lines.contains(node.getRange().get().begin.line)) {
+                                        nodes.add(node);
+                                        lines.add(node.getRange().get().begin.line);
+                                    }
+                                    allAsserts.put(node.toString().trim(), lines);
                                 }
-                                allAsserts.put(node.toString().trim(), lines);
                             }
                         }
                     }
