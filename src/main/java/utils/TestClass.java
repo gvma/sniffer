@@ -6,11 +6,13 @@ public class TestClass {
     private final String className;
     private final List<TestMethod> testMethods;
     private final String classContent;
+    private final String absolutePath;
 
-    public TestClass(List<TestMethod> testMethods, String className, String classContent) {
+    public TestClass(List<TestMethod> testMethods, String className, String classContent, String absolutePath) {
         this.testMethods = testMethods;
         this.className = className;
         this.classContent = classContent;
+        this.absolutePath = absolutePath;
     }
 
     public List<TestMethod> getTestMethods() {
@@ -20,6 +22,10 @@ public class TestClass {
     public String getClassName() {
         return className;
     }
+
+    public String getClassContent() { return classContent; }
+
+    public String getAbsolutePath() { return absolutePath; }
 
     @Override
     public String toString() {

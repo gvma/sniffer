@@ -1,16 +1,12 @@
 package matchers;
 
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
-import com.sun.source.tree.Tree;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -31,9 +27,9 @@ public class ConditionalTestMatcher extends SmellMatcher {
     }
 
     @Override
-    public void write(String filePath, String testSmell, String methodName, String lines) {
-        OutputWriter.getInstance().write(filePath, testSmell, methodName, lines);
-        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found conditional test in method \"" + methodName + "\" in lines " + lines);
+    public void write(String filePath, String testSmell, String name, String lines) {
+        OutputWriter.getInstance().write(filePath, testSmell, name, lines);
+        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found conditional test in method \"" + name + "\" in lines " + lines);
     }
 
     private void matchConditionalTest(List<Node> nodeList, Set<Integer> lines) {

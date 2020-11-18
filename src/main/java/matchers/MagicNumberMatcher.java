@@ -1,14 +1,12 @@
 package matchers;
 
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.expr.LiteralExpr;
 import com.github.javaparser.ast.visitor.TreeVisitor;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -29,9 +27,9 @@ public class MagicNumberMatcher extends SmellMatcher {
     }
 
     @Override
-    public void write(String filePath, String testSmell, String methodName, String lines) {
-        OutputWriter.getInstance().write(filePath, testSmell, methodName, lines);
-        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found magic number in method \"" + methodName + "\" in lines " + lines);
+    public void write(String filePath, String testSmell, String name, String lines) {
+        OutputWriter.getInstance().write(filePath, testSmell, name, lines);
+        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found magic number in method \"" + name + "\" in lines " + lines);
     }
 
     private void matchMagicNumber(List<Node> nodeList, Set<Integer> lines) {

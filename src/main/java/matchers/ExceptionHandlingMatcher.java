@@ -23,9 +23,9 @@ public class ExceptionHandlingMatcher extends SmellMatcher {
     }
 
     @Override
-    public void write(String filePath, String testSmell, String methodName, String lines) {
-        OutputWriter.getInstance().write(filePath, testSmell, methodName, lines);
-        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found Exception Handling in method \"" + methodName + "\" in line " + lines);
+    public void write(String filePath, String testSmell, String name, String lines) {
+        OutputWriter.getInstance().write(filePath, testSmell, name, lines);
+        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found Exception Handling in method \"" + name + "\" in line " + lines);
     }
 
     private boolean matchExceptionHandling(List<Node> nodeList) {
