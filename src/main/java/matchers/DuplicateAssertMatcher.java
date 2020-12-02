@@ -37,9 +37,9 @@ public class DuplicateAssertMatcher extends SmellMatcher {
     }
 
     @Override
-    public void write(String filePath, String testSmell, String methodName, String lines) {
-        OutputWriter.getInstance().write(filePath, testSmell, methodName, lines);
-        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found duplicate assert in method \"" + methodName + "\" in lines " + lines);
+    public void write(String filePath, String testSmell, String name, String lines) {
+        OutputWriter.getInstance().write(filePath, testSmell, name, lines);
+        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found duplicate assert in method \"" + name + "\" in lines " + lines);
     }
 
     private void getAllAsserts(List<Node> nodeList, Map<String, List<Integer>> allAsserts) {

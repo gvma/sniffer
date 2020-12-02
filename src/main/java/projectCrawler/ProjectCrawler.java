@@ -40,7 +40,7 @@ public class ProjectCrawler {
                         logger.info("Analyzing file " + file.getAbsolutePath());
                         List<TestMethod> testMethods = gatherAllTestMethodsFromFile(new LinkedList<>(), file);
                         if (testMethods.size() > 0) {
-                            testClasses.add(new TestClass(testMethods, file.getName(), StaticJavaParser.parse(file).toString()));
+                            testClasses.add(new TestClass(testMethods, file.getName(), StaticJavaParser.parse(file).toString(), file.getAbsolutePath()));
                         }
                     }
                 }
