@@ -11,6 +11,7 @@ public class OutputWriter {
     public static CSVWriter csvWriter;
     public static String projectName;
     private static volatile OutputWriter instance;
+    private static String outputPath;
 
     private OutputWriter() {}
 
@@ -28,6 +29,7 @@ public class OutputWriter {
     }
 
     public void setOutputFile(String projectPath) {
+        outputPath = projectPath;
         String regex;
         if (System.getProperty("file.separator").equals("/")) {
             regex = "/";
@@ -41,9 +43,7 @@ public class OutputWriter {
 
     private void writeFirstCSVRow() {
         try {
-            csvWriter = new CSVWriter(new FileWriter(System.getProperty("user.dir")
-                    + System.getProperty("file.separator")
-                    + OutputWriter.projectName + "_output.csv"));
+            csvWriter = new CSVWriter(new FileWriter(outputPath + "\\" + projectName + "_output.csv"));
             csvWriter.writeNext(new String[]{"Project", "Absolute Path", "Test Smell", "Method Name", "Lines"}, true);
         } catch (IOException e) {
             e.printStackTrace();
