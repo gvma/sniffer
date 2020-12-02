@@ -61,4 +61,14 @@ public class OutputWriter {
         itemsArray = toWrite.toArray(itemsArray);
         csvWriter.writeNext(itemsArray, true);
     }
+
+    public void write(String filePath, String newFeature) {
+        List<String> toWrite = new LinkedList<>();
+        toWrite.add(projectName);
+        toWrite.add(filePath);
+        toWrite.add(newFeature);
+        String[] itemsArray = new String[toWrite.size()];
+        itemsArray = toWrite.toArray(itemsArray);
+        csvWriter.writeNext(itemsArray, true);
+    }
 }
