@@ -48,7 +48,7 @@ public class ProjectCrawler {
         }
     }
 
-    public List<TestMethod> gatherAllTestMethodsFromFile(List<TestMethod> testMethods, File javaFile) throws FileNotFoundException, ParseProblemException {
+    public List<TestMethod> gatherAllTestMethodsFromFile(List<TestMethod> testMethods, File javaFile) throws FileNotFoundException {
         try {
             new VoidVisitorAdapter<>() {
                 @Override
