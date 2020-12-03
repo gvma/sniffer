@@ -28,7 +28,7 @@ public class GithubRepositoryClone {
 
             try {
                 System.out.println("Cloning url: " + url);
-                cloneRepository(url, repoWithRelease == null ? repository.getName() : repoWithRelease, outputPath);
+                cloneRepository(url, repoWithRelease == null ? repository.getName() : repoWithRelease + " " + repository.getName(), outputPath);
             } catch (JGitInternalException e) {
                 System.out.println("Skipping project " + repository.getFullName());
             }
