@@ -8,6 +8,7 @@ import com.github.javaparser.ast.visitor.TreeVisitor;
 import projectCrawler.ProjectCrawler;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
@@ -17,24 +18,39 @@ import java.util.logging.Logger;
 public class JUnit5Utilization {
 
     private ProjectCrawler projectCrawler;
-    private final Set<String> JUnit5NewFeatures;
+    private Set<String> JUnit5NewFeatures = null;
+    private boolean flagUseJUnit5 = false;
+    final boolean[] flagUseJUnit5NewFeature = { false };
 
-    public JUnit5Utilization(String projectsPath) throws IOException, InterruptedException {
-        File rootDir = new File(projectsPath);
-        JUnit5NewFeatures = new HashSet<>();
-        addNewFeatures();
-        OutputWriter.getInstance().setOutputFile(projectsPath);
-        for (File f : Objects.requireNonNull(rootDir.listFiles())) {
-            Logger.getLogger(JUnit5Utilization.class.getName()).info("Starting analysis for project " + f.getName());
-            String projectPath = f.getAbsolutePath();
-            this.projectCrawler = new ProjectCrawler(projectPath);
-            projectCrawler.run();
-            findJUnit5Imports();
-            OutputWriter.csvWriter.flush();
+    public JUnit5Utilization(String projectsPath) {
+        try {
+            File rootDir = new File(projectsPath);
+            JUnit5NewFeatures = new HashSet<>();
+            addNewFeatures();
+            FileWriter outDir = new FileWriter(projectsPath + "\\logs.txt");
+            OutputWriter.getInstance().setOutputFile(projectsPath);
+            for (File f : Objects.requireNonNull(rootDir.listFiles())) {
+                flagUseJUnit5 = false;
+                Logger.getLogger(JUnit5Utilization.class.getName()).info("Starting analysis for project " + f.getName());
+                String projectPath = f.getAbsolutePath();
+                this.projectCrawler = new ProjectCrawler(projectPath);
+                projectCrawler.run();
+                findJUnit5Imports();
+                if (flagUseJUnit5 && !flagUseJUnit5NewFeature[0]) {
+                    outDir.write("Uses JUnit 5 with no new feature: " + projectsPath);
+                    outDir.flush();
+                }
+                OutputWriter.csvWriter.flush();
+            }
+            outDir.close();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 
     public void findJUnit5Imports() {
+        flagUseJUnit5 = false;
+        flagUseJUnit5NewFeature[0] = false;
         for (TestClass testClass : projectCrawler.getTestClasses()) {
             CompilationUnit cu = StaticJavaParser.parse(testClass.getClassContent());
             Set<String> usedFromJUnit5 = new HashSet<>();
@@ -43,18 +59,22 @@ public class JUnit5Utilization {
                 if (importName.contains("org.junit.jupiter")) {
                     String[] splitted = importName.split("\\.");
                     usedFromJUnit5.add(splitted[splitted.length - 1]);
+                    flagUseJUnit5 = true;
                 }
             }
-            for (String s : usedFromJUnit5) {
-                if (JUnit5NewFeatures.contains(s)) {
-                    new TreeVisitor() {
-                        @Override
-                        public void process(Node node) {
-                            if (node.toString().equals(s)) {
-                                OutputWriter.getInstance().write(testClass.getAbsolutePath(), s);
+            if (flagUseJUnit5) {
+                for (String s : usedFromJUnit5) {
+                    if (JUnit5NewFeatures.contains(s)) {
+                        new TreeVisitor() {
+                            @Override
+                            public void process(Node node) {
+                                if (node.toString().equals(s)) {
+                                    flagUseJUnit5NewFeature[0] = true;
+                                    OutputWriter.getInstance().write(testClass.getAbsolutePath(), s);
+                                }
                             }
-                        }
-                    }.visitPreOrder(cu.findRootNode());
+                        }.visitPreOrder(cu.findRootNode());
+                    }
                 }
             }
         }
