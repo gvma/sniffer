@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public final class AssertionRouletteMatcher extends SmellMatcher {
+public class AssertionRouletteMatcher extends SmellMatcher {
 
     private Integer assertionCount = 0;
 
