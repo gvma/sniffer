@@ -37,7 +37,7 @@ public class JUnit5Utilization {
                 projectCrawler.run();
                 findJUnit5Imports();
                 if (flagUseJUnit5 && !flagUseJUnit5NewFeature[0]) {
-                    outDir.write("Uses JUnit 5 with no new feature: " + projectsPath);
+                    outDir.write("Uses JUnit 5 with no new feature: " + f.getName());
                     outDir.flush();
                 }
                 OutputWriter.csvWriter.flush();
