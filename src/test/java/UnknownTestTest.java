@@ -21,8 +21,8 @@ public class UnknownTestTest {
         }
     }
 
-    @Test(expected = Exception.class)
-    public void unknownTestAnnotationParamFalse() throws Exception {
-        throw new Exception();
-    }
+//    @Test(expected = Exception.class)
+//    public void unknownTestAnnotationParamFalse() throws Exception {
+//        throw new Exception();
+//    }
 }

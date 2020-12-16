@@ -8,6 +8,7 @@ import utils.OutputWriter;
 import utils.TestClass;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class ConstructorInitializationMatcher extends SmellMatcher {
@@ -19,8 +20,13 @@ public class ConstructorInitializationMatcher extends SmellMatcher {
             @Override
             public void process(Node node) {
                 if (node.getMetaModel().getTypeName().equals("ConstructorDeclaration")) {
-                    if (node.getRange().isPresent()) {
-                        line[0] = node.getRange().get().begin.line;
+                    List<Node> nodes = node.getChildNodes();
+                    for (Node n : nodes) {
+                        if (n.toString().equals(testClass.getClassName())) {
+                            if (node.getRange().isPresent()) {
+                                line[0] = node.getRange().get().begin.line;
+                            }
+                        }
                     }
                 }
             }

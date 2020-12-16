@@ -1,6 +1,5 @@
 package matchers;
 
-import utils.OutputWriter;
 import utils.TestClass;
 
 public abstract class SmellMatcher {

@@ -35,10 +35,15 @@ public class SensitiveEqualityMatcher extends SmellMatcher{
             new TreeVisitor() {
                 @Override
                 public void process(Node node) {
-                    if (node.toString().matches("toString")) {
-                        if (node.getRange().isPresent()) {
-                            if (!lines.contains(node.getRange().get().begin.line)) {
-                                lines.add(node.getRange().get().begin.line);
+                    if ((node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert"))) {
+                        List<Node> nodes = node.getChildNodes();
+                        for (Node child : nodes) {
+                            if (child.toString().contains("toString")) {
+                                if (child.getRange().isPresent()) {
+                                    if (!lines.contains(child.getRange().get().begin.line)) {
+                                        lines.add(child.getRange().get().begin.line);
+                                    }
+                                }
                             }
                         }
                     }
