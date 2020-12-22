@@ -22,7 +22,7 @@ public class ConstructorInitializationMatcher extends SmellMatcher {
                 if (node.getMetaModel().getTypeName().equals("ConstructorDeclaration")) {
                     List<Node> nodes = node.getChildNodes();
                     for (Node n : nodes) {
-                        if (n.toString().equals(testClass.getClassName())) {
+                        if (testClass.getClassName().startsWith(n.toString())) {
                             if (node.getRange().isPresent()) {
                                 line[0] = node.getRange().get().begin.line;
                             }

@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 public class DefaultTestMatcher extends SmellMatcher {
     @Override
     protected void match(TestClass testClass) {
-        if (testClass.getClassName().equals("ExampleUnitTest") || testClass.getClassName().equals("ExampleInstrumentedTest")) {
+        if (testClass.getClassName().startsWith("ExampleUnitTest") || testClass.getClassName().startsWith("ExampleInstrumentedTest")) {
             for (TestMethod testMethod : testClass.getTestMethods()) {
                 if (testMethod.getMethodName().equals("addition_isCorrect") || testMethod.getMethodName().equals("useAppContext")) {
                     write(testClass.getAbsolutePath(), "Default Test", testClass.getClassName(), "");
