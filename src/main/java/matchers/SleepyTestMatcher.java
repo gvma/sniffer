@@ -2,6 +2,7 @@ package matchers;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -17,7 +18,7 @@ public class SleepyTestMatcher extends SmellMatcher {
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
                 List<Integer> lines = new LinkedList<>();
                 matchSleepyTest(node.getChildNodes(), lines);
-                if (!lines.isEmpty()) {
+                if (!lines.isEmpty() && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
                     write(testMethod.getTestFilePath(), "Sleepy Test", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
                 }
             }

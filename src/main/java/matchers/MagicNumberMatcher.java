@@ -2,6 +2,7 @@ package matchers;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -19,7 +20,7 @@ public class MagicNumberMatcher extends SmellMatcher {
             Set<Integer> lines = new HashSet<>();
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
                 matchMagicNumber(node.getChildNodes(), lines);
-                if (lines.size() > 0) {
+                if (lines.size() > 0 && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
                     write(testMethod.getTestFilePath(), "Magic Number", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
                 }
             }

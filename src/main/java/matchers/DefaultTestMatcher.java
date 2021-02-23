@@ -1,5 +1,6 @@
 package matchers;
 
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -11,7 +12,7 @@ public class DefaultTestMatcher extends SmellMatcher {
     protected void match(TestClass testClass) {
         if (testClass.getClassName().startsWith("ExampleUnitTest") || testClass.getClassName().startsWith("ExampleInstrumentedTest")) {
             for (TestMethod testMethod : testClass.getTestMethods()) {
-                if (testMethod.getMethodName().equals("addition_isCorrect") || testMethod.getMethodName().equals("useAppContext")) {
+                if ((testMethod.getMethodName().equals("addition_isCorrect") || testMethod.getMethodName().equals("useAppContext")) && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
                     write(testClass.getAbsolutePath(), "Default Test", testClass.getClassName(), "");
                 }
             }

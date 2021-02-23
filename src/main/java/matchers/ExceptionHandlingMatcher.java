@@ -2,6 +2,7 @@ package matchers;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -15,7 +16,7 @@ public class ExceptionHandlingMatcher extends SmellMatcher {
     protected void match(TestClass testClass) {
         for (TestMethod testMethod : testClass.getTestMethods()) {
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-                if (matchExceptionHandling(node.getChildNodes())) {
+                if (matchExceptionHandling(node.getChildNodes()) && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
                     write(testMethod.getTestFilePath(), "Exception Handling", testMethod.getMethodDeclaration().getNameAsString(), Integer.toString(testMethod.getBeginLine()));
                 }
             }

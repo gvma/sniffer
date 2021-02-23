@@ -1,6 +1,7 @@
 package matchers;
 
 import com.github.javaparser.ast.Node;
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -14,7 +15,7 @@ public class EmptyTestMatcher extends SmellMatcher {
         for (TestMethod testMethod : testClass.getTestMethods()) {
             List<Node> nodeList = testMethod.getMethodDeclaration().getChildNodes();
             if (nodeList.get(nodeList.size() - 1).getChildNodes().size() == 0) {
-                if (nodeList.get(nodeList.size() - 1).getRange().isPresent()) {
+                if (nodeList.get(nodeList.size() - 1).getRange().isPresent() && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
                     write(testClass.getAbsolutePath(),
                             "Empty Test",
                             testClass.getClassName(),

@@ -2,6 +2,7 @@ package matchers;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -17,7 +18,7 @@ public class TestRunWarMatcher extends SmellMatcher {
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
                 List<Integer> lines = new LinkedList<>();
                 matchTestRunWar(node.getChildNodes(), lines);
-                if (!lines.isEmpty()) {
+                if (!lines.isEmpty() && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
                     write(testMethod.getTestFilePath(), "Test Run War", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
 
                 }

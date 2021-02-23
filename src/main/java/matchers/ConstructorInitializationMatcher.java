@@ -4,6 +4,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 
@@ -31,7 +32,7 @@ public class ConstructorInitializationMatcher extends SmellMatcher {
                 }
             }
         }.visitPreOrder(cu.findRootNode());
-        if (line[0] != null) {
+        if (line[0] != null && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
             write(testClass.getAbsolutePath(), "Constructor Initialization", testClass.getClassName(), Arrays.toString(line));
         }
     }

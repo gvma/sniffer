@@ -15,7 +15,8 @@ import java.util.Set;
 public class JUnit5Utilization {
 
     private final ProjectCrawler projectCrawler;
-    private final Set<String> JUnit5NewFeatures;
+    private static Set<String> JUnit5NewFeatures = null;
+    private static Set<String> JUnit5Files = new HashSet<>();
 
     public JUnit5Utilization(String projectPath) throws FileNotFoundException {
         OutputWriter.getInstance().setOutputFile(projectPath);
@@ -34,6 +35,7 @@ public class JUnit5Utilization {
                 if (importName.contains("org.junit.jupiter")) {
                     String[] splitted = importName.split("\\.");
                     usedFromJUnit5.add(splitted[splitted.length - 1]);
+                    JUnit5Files.add(testClass.getAbsolutePath());
                 }
             }
             for (String s : usedFromJUnit5) {
@@ -96,4 +98,15 @@ public class JUnit5Utilization {
         JUnit5NewFeatures.add("assumingThat");
     }
 
+    public static boolean isSmellyAndJUnit5(String path) {
+        return JUnit5Files.contains(path);
+    }
+
+    public static Set<String> getJUnit5NewFeatures() {
+        return JUnit5NewFeatures;
+    }
+
+    public static Set<String> getJUnit5Files() {
+        return JUnit5Files;
+    }
 }

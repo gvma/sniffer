@@ -2,6 +2,7 @@ package matchers;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -29,7 +30,7 @@ public class DuplicateAssertMatcher extends SmellMatcher {
                         }
                     }
                 }
-                if (!lines.isEmpty()) {
+                if (!lines.isEmpty() && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
                     write(testMethod.getTestFilePath(), "Duplicate Assert", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
                 }
             }

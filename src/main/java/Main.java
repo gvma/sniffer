@@ -1,5 +1,6 @@
 import github.GithubRepositoryClone;
 import matchers.Sniffer;
+import utils.JUnit5Utilization;
 
 import java.io.File;
 import java.util.Objects;
@@ -19,6 +20,8 @@ public class Main {
                         }
                     }
                 } else {
+                    JUnit5Utilization jUnit5Utilization = new JUnit5Utilization(args[0]);
+                    jUnit5Utilization.findJUnit5Imports();
                     Sniffer sniffer = new Sniffer(args[0]);
                     sniffer.sniff();
                 }

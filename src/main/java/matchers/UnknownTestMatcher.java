@@ -2,6 +2,7 @@ package matchers;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -17,7 +18,7 @@ public class UnknownTestMatcher extends SmellMatcher {
     protected void match(TestClass testClass) {
         for (TestMethod testMethod : testClass.getTestMethods()) {
             matchUnknownTest(testMethod.getMethodDeclaration().getChildNodes());
-            if (assertionCount == 0) {
+            if (assertionCount == 0 && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
                 write(testMethod.getTestFilePath(), "Unknown Test", testMethod.getMethodDeclaration().getNameAsString(), Integer.toString(testMethod.getBeginLine()));
             }
             assertionCount = 0;

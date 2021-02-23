@@ -1,15 +1,12 @@
-import org.assertj.core.api.ListAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Collections.emptyMap;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MagicNumberTest {
 

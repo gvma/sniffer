@@ -2,6 +2,7 @@ package matchers;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import utils.JUnit5Utilization;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
@@ -20,7 +21,7 @@ public class AssertionRouletteMatcher extends SmellMatcher {
             for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
                 List<Integer> lines = new LinkedList<>();
                 matchAssertionRoulette(node.getChildNodes(), lines);
-                if (assertionCount >= 2) {
+                if (assertionCount >= 2 && JUnit5Utilization.isSmellyAndJUnit5(testClass.getAbsolutePath())) {
                     write(testMethod.getTestFilePath(), "Assertion Roulette", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
                 }
                 assertionCount = 0;
