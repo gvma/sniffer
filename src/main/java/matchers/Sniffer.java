@@ -7,10 +7,7 @@ import utils.TestClass;
 
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 public class Sniffer {
 
@@ -32,5 +29,9 @@ public class Sniffer {
             }
         }
         OutputWriter.csvWriter.close();
+    }
+
+    public ProjectCrawler getProjectCrawler() {
+        return projectCrawler;
     }
 }

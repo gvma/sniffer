@@ -1,30 +1,26 @@
 import github.GithubRepositoryClone;
 import matchers.Sniffer;
+import projectCrawler.ProjectCrawler;
+import utils.TestClass;
+import utils.TestMethod;
 
-import java.io.File;
-import java.util.Objects;
+import java.io.FileWriter;
 
 public class Main {
     public synchronized static void main(String[] args) throws Exception {
-        if (args.length > 0) {
-            if (args[0].equals("-githubClone")) {
-                new GithubRepositoryClone(args[1], args[2], args[3], args[4], args[5]);
-            } else {
-                if (args[0].equals("-multipleProjects")) {
-                    File rootDir = new File(args[1]);
-                    for (File file : Objects.requireNonNull(rootDir.listFiles())) {
-                        if (file.isDirectory()) {
-                            Sniffer sniffer = new Sniffer(args[1] + "\\" + file.getName());
-                            sniffer.sniff();
-                        }
-                    }
-                } else {
-                    Sniffer sniffer = new Sniffer(args[0]);
-                    sniffer.sniff();
-                }
+        Sniffer sniffer = new Sniffer(args[0]);
+        int count = 0;
+        String classTemplate = "public class %s {\n%s\n}";
+        String outputPath = "C:\\Users\\guiga\\Documents\\UFAL\\IC\\EASY\\methodPerFile";
+        ProjectCrawler projectCrawler = sniffer.getProjectCrawler();
+        for (TestClass testClass : projectCrawler.getTestClasses()) {
+            for (TestMethod testMethod : testClass.getTestMethods()) {
+                FileWriter fileWriter = new FileWriter(outputPath + "\\" + "java" + count + ".java");
+                fileWriter.write(String.format(classTemplate, "java" + count, testMethod.getMethodDeclaration()));
+                fileWriter.flush();
+                fileWriter.close();
+                count++;
             }
-        } else {
-            throw new IllegalArgumentException("You must provide a correct file path with a java project!");
         }
     }
 }
