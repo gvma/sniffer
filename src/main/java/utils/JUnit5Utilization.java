@@ -54,6 +54,11 @@ public class JUnit5Utilization {
 
     public void addNewFeatures() {
         JUnit5NewFeatures.add("ParameterizedTest");
+        JUnit5NewFeatures.add("BeforeEach");
+        JUnit5NewFeatures.add("AfterEach");
+        JUnit5NewFeatures.add("BeforeAll");
+        JUnit5NewFeatures.add("AfterAll");
+        JUnit5NewFeatures.add("Disabled");
         JUnit5NewFeatures.add("RepeatedTest");
         JUnit5NewFeatures.add("TestFactory");
         JUnit5NewFeatures.add("TestTemplate");
