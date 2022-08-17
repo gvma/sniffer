@@ -5,8 +5,10 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import org.xml.sax.SAXException;
 import projectCrawler.ProjectCrawler;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
@@ -17,7 +19,7 @@ public class JUnit5Utilization {
     private final ProjectCrawler projectCrawler;
     private final Set<String> JUnit5NewFeatures;
 
-    public JUnit5Utilization(String projectPath) throws FileNotFoundException {
+    public JUnit5Utilization(String projectPath) throws IOException, ParserConfigurationException, SAXException {
         OutputWriter.getInstance().setOutputFile(projectPath);
         this.projectCrawler = new ProjectCrawler(projectPath);
         projectCrawler.run();
