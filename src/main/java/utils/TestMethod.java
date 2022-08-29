@@ -1,35 +1,24 @@
 package utils;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
+import org.w3c.dom.Node;
 
 public class TestMethod {
-    private final int beginLine;
-    private final int endLine;
     private final String methodName;
-    private final MethodDeclaration methodDeclaration;
+    private final Node methodDeclaration;
     private final String testFilePath;
 
-    public TestMethod(int beginLine, int endLine, String methodName, MethodDeclaration methodDeclaration, String testFilePath) {
-        this.beginLine = beginLine;
-        this.endLine = endLine;
+    public TestMethod(String methodName, Node methodDeclaration, String testFilePath) {
         this.methodName = methodName;
         this.methodDeclaration = methodDeclaration;
         this.testFilePath = testFilePath;
-    }
-
-    public int getBeginLine() {
-        return beginLine;
-    }
-
-    public int getEndLine() {
-        return endLine;
     }
 
     public String getMethodName() {
         return methodName;
     }
 
-    public MethodDeclaration getMethodDeclaration() {
+    public Node getMethodDeclaration() {
         return methodDeclaration;
     }
 
@@ -40,10 +29,9 @@ public class TestMethod {
     @Override
     public String toString() {
         return "\nutils.TestMethod {\n" +
-                "\tbeginLine=" + beginLine + ",\n" +
-                "\tendLine=" + endLine + ",\n" +
                 "\ttestFilePath='" + testFilePath + '\'' + ",\n" +
                 "\tmethodName='" + methodName + '\'' +
+                "\tmethodDeclaration='" + methodDeclaration.getTextContent() + '\'' +
                 "\n}";
     }
 }

@@ -1,24 +1,22 @@
 package matchers;
 
-import com.github.javaparser.ast.Node;
+import org.w3c.dom.NodeList;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 public class EmptyTestMatcher extends SmellMatcher {
     @Override
     protected void match(TestClass testClass) {
         for (TestMethod testMethod : testClass.getTestMethods()) {
-            List<Node> nodeList = testMethod.getMethodDeclaration().getChildNodes();
-            if (nodeList.get(nodeList.size() - 1).getChildNodes().size() == 0) {
-                if (nodeList.get(nodeList.size() - 1).getRange().isPresent()) {
-                    write(testClass.getAbsolutePath(),
-                            "Empty Test",
-                            testClass.getClassName(),
-                            String.valueOf(nodeList.get(nodeList.size() - 1).getRange().get().begin.line));
+            NodeList methodChilds = testMethod.getMethodDeclaration().getChildNodes();
+            for (int i = 0; i < methodChilds.getLength(); ++i) {
+                if (methodChilds.item(i).getNodeName().equals("block_content")) {
+                    if (methodChilds.item(i).getTextContent().isBlank()) {
+                        write(testClass.getAbsolutePath(), "Empty Test", testMethod.getMethodName(), "[]");
+                    }
                 }
             }
         }

@@ -1,13 +1,16 @@
 package matchers;
 
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.visitor.TreeVisitor;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.TreeWalker;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -16,11 +19,13 @@ public class ConditionalTestMatcher extends SmellMatcher {
     @Override
     protected void match(TestClass testClass) {
         for (TestMethod testMethod : testClass.getTestMethods()) {
-            for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
+            NodeList methodChilds = testMethod.getMethodDeclaration().getChildNodes();
+            for (int i = 0; i < methodChilds.getLength(); ++i) {
+                Node node = methodChilds.item(i);
                 Set<Integer> lines = new HashSet<>();
                 matchConditionalTest(node.getChildNodes(), lines);
                 if (lines.size() != 0) {
-                    write(testMethod.getTestFilePath(), "Conditional Test", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
+                    write(testMethod.getTestFilePath(), "Conditional Test", testMethod.getMethodName(), new LinkedList<>().toString());
                 }
             }
         }
@@ -32,30 +37,23 @@ public class ConditionalTestMatcher extends SmellMatcher {
         Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found conditional test in method \"" + name + "\" in lines " + lines);
     }
 
-    private void matchConditionalTest(List<Node> nodeList, Set<Integer> lines) {
-        for (Node node : nodeList) {
-            new TreeVisitor() {
-                @Override
-                public void process(Node node) {
-                    if (node.getMetaModel().getTypeName().equals("IfStmt")
-                            || node.getMetaModel().getTypeName().equals("WhileStmt")
-                            || node.getMetaModel().getTypeName().equals("ForStmt")
-                            || node.getMetaModel().getTypeName().equals("DoStmt")) {
-                        for (Node child : node.getChildNodes()) {
-                            new TreeVisitor() {
-                                @Override
-                                public void process(Node node) {
-                                    if (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert")) {
-                                        if (node.getRange().isPresent()) {
-                                            lines.add(node.getRange().get().begin.line);
-                                        }
-                                    }
-                                }
-                            }.visitPreOrder(child);
+    private void matchConditionalTest(NodeList nodeList, Set<Integer> lines) {
+        for (int i = 0; i < nodeList.getLength(); ++i) {
+            Node root = nodeList.item(i);
+            if (root.getNodeName().equals("if_stmt") || root.getNodeName().equals("for") || root.getNodeName().equals("while") || root.getNodeName().equals("do")) {
+                NodeList conditionalChilds = root.getChildNodes();
+                for (int j = 0; j < conditionalChilds.getLength(); ++j) {
+                    Node conditional = conditionalChilds.item(j);
+                    DocumentTraversal traversal = (DocumentTraversal) conditional.getOwnerDocument();
+                    TreeWalker iterator = traversal.createTreeWalker(conditional, NodeFilter.SHOW_ALL, null, false);
+                    Node c = null;
+                    while ((c = iterator.nextNode()) != null) {
+                        if (c.getNodeName().equals("expr") && c.getTextContent().contains("EXPECT_")) {
+                            lines.add(0);
                         }
                     }
                 }
-            }.visitPreOrder(node);
+            }
         }
     }
 }

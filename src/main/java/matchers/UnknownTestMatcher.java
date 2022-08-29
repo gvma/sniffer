@@ -1,52 +1,32 @@
 package matchers;
 
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.visitor.TreeVisitor;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
-import java.util.List;
+import java.util.LinkedList;
 import java.util.logging.Logger;
 
 public class UnknownTestMatcher extends SmellMatcher {
 
-    private Integer assertionCount = 0;
-
     @Override
     protected void match(TestClass testClass) {
         for (TestMethod testMethod : testClass.getTestMethods()) {
-            matchUnknownTest(testMethod.getMethodDeclaration().getChildNodes());
-            if (assertionCount == 0) {
-                write(testMethod.getTestFilePath(), "Unknown Test", testMethod.getMethodDeclaration().getNameAsString(), Integer.toString(testMethod.getBeginLine()));
+            NodeList methodChilds = testMethod.getMethodDeclaration().getChildNodes();
+            for (int i = 0; i < methodChilds.getLength(); ++i) {
+                Node node = methodChilds.item(i);
+                if (node.getNodeName().equals("block_content") && !node.getTextContent().contains("EXPECT_")) {
+                    write(testMethod.getTestFilePath(), "Unknown Test", testMethod.getMethodName(), new LinkedList<>().toString());
+                }
             }
-            assertionCount = 0;
         }
     }
 
     @Override
     public void write(String filePath, String testSmell, String name, String lines) {
         OutputWriter.getInstance().write(filePath, testSmell, name, lines);
-        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found assertion roulette in method \"" + name + "\" in lines " + lines);
-    }
-
-    private void matchUnknownTest(List<Node> nodeList) {
-        for (Node node : nodeList) {
-            if (node.getMetaModel().getTypeName().equals("NormalAnnotationExpr")) {
-                if (node.toString().contains("expected")) {
-                    assertionCount++;
-                }
-            }
-            new TreeVisitor() {
-                @Override
-                public void process(Node node) {
-                    if (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert")) {
-                        assertionCount++;
-                    } else if (node.toString().trim().startsWith("fail")) {
-                        assertionCount++;
-                    }
-                }
-            }.visitPreOrder(node);
-        }
+        Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found unknown test in method \"" + name + "\" in lines " + lines);
     }
 }

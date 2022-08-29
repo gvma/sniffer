@@ -1,11 +1,5 @@
 package projectCrawler;
 
-import com.github.javaparser.ParseProblemException;
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.sun.xml.internal.bind.annotation.XmlLocation;
 import matchers.Sniffer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -15,8 +9,6 @@ import projectCrawler.positionalXMLReader.PositionalXMLReader;
 import utils.TestClass;
 import utils.TestMethod;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.util.LinkedList;
@@ -36,14 +28,14 @@ public class ProjectCrawler {
         run(rootFile);
     }
 
-    private void run(File rootFile) throws IOException, ParserConfigurationException, SAXException {
+    private void run(File rootFile) throws IOException, SAXException {
         File[] listedFiles = rootFile.listFiles();
         if (listedFiles != null) {
             for (File file : listedFiles) {
                 if (file.isDirectory()) {
                     run(file);
                 } else if (file.isFile()) {
-                    if (file.getName().endsWith(".java")) {
+                    if (file.getName().endsWith(".cpp")) {
                         Logger logger = Logger.getLogger(Sniffer.class.getName());
                         logger.info("Analyzing file " + file.getAbsolutePath());
 
@@ -52,11 +44,10 @@ public class ProjectCrawler {
                         Runtime rt = Runtime.getRuntime();
                         rt.exec(String.format("C:\\Program Files\\srcML\\srcml \"%s\" -o \"%s\"", filePath, xmlFilePath));
 
-                        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                         File xmlFile = new File(xmlFilePath);
-                        FileReader fileReader = new FileReader(xmlFile);   //reads the file
-                        BufferedReader br=new BufferedReader(fileReader);  //creates a buffering character input stream
-                        StringBuilder xmlString = new StringBuilder();    //constructs a string buffer with no characters
+                        FileReader fileReader = new FileReader(xmlFile);
+                        BufferedReader br=new BufferedReader(fileReader);
+                        StringBuilder xmlString = new StringBuilder();
                         String line;
                         while ((line = br.readLine()) != null) {
                             xmlString.append(line).append("\n");
@@ -68,95 +59,142 @@ public class ProjectCrawler {
                         Document doc = PositionalXMLReader.readXML(inputStream);
                         inputStream.close();
                         NodeList childNodes = doc.getFirstChild().getChildNodes();
-                        System.out.println(childNodes.item(0).getNodeName());
-                        System.out.println("Line number: " + childNodes.item(0).getUserData("lineNumber"));
 
-                        for (int i = 0; i < childNodes.getLength(); ++i) {
-                            Node node = childNodes.item(i);
-                            if (node.getNodeName().equals("class")) {
-                                NodeList classNodeList = node.getChildNodes();
-                                for (int j = 0; j < classNodeList.getLength(); ++j) {
-                                    Node classNode = classNodeList.item(j);
-                                    if (classNode.getNodeName().equals("block")) {
-                                        NodeList blockNodeList = classNode.getChildNodes();
-                                        for (int k = 0; k < blockNodeList.getLength(); ++k) {
-                                            Node blockNode = blockNodeList.item(k);
-                                            if (blockNode.getNodeName().equals("function")) {
-                                                NodeList functionNodeList = blockNode.getChildNodes();
-                                                for (int l = 0; l < functionNodeList.getLength(); ++l) {
-                                                    Node functionNode = functionNodeList.item(l);
-                                                    if (functionNode.getNodeName().equals("annotation")) {
-                                                        NodeList annotationNodeList = functionNode.getChildNodes();
-                                                        for (int m = 0; m < annotationNodeList.getLength(); ++m) {
-                                                            Node nameNode = annotationNodeList.item(m);
-                                                            if (nameNode.getNodeName().equals("name")) {
-                                                                Node testNode = nameNode.getFirstChild();
-                                                                if (testNode.getNodeValue().equals("Test")) {
-//                                                                    System.out.println(testNode.getNodeName());
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-//                        doc.getDocumentElement().normalize();
-//                        NodeList nodeList = doc.getElementsByTagName("annotation");
-//                        if (nodeList.getLength() > 0) {
-//
-//                            for (int i = 0; i < nodeList.getLength(); ++i) {
-//                                NodeList annotationChilds = nodeList.item(i).getChildNodes();
-//                                for (int j = 0; j < annotationChilds.getLength(); ++j) {
-//                                    Node nameNode = annotationChilds.item(j);
-//                                    if (annotationChilds.item(j).getNodeName().equals("name")) {
-//                                        Node nameNodeFirstChild = nameNode.getFirstChild();
-//                                        if (nameNodeFirstChild.getNodeValue().equals("Test")) {
-//                                            System.out.println(nameNodeFirstChild.getUserData("lineNumber"));
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-                        List<TestMethod> testMethods = gatherAllTestMethodsFromFile(new LinkedList<>(), file);
-//                        if (testMethods.size() > 0) {
-//                            testClasses.add(new TestClass(testMethods, file.getName(), StaticJavaParser.parse(file).toString(), file.getAbsolutePath()));
-//                        }
+                        findMethods(childNodes, file, false);
+                        findMethods(childNodes, file, true);
                     }
                 }
             }
         }
     }
 
-    public List<TestMethod> gatherAllTestMethodsFromFile(List<TestMethod> testMethods, File javaFile) throws FileNotFoundException {
-        try {
-            new VoidVisitorAdapter<>() {
-                @Override
-                public void visit(MethodDeclaration n, Object arg) {
-                    super.visit(n, arg);
-                    if (n.getAnnotations().size() != 0) {
-                        for (AnnotationExpr annotationExpr : n.getAnnotations()) {
-                            if (annotationExpr.getNameAsString().equals("Test")) {
-                                if (n.getRange().isPresent()) {
-                                    testMethods.add(new TestMethod(n.getRange().get().begin.line,
-                                            n.getRange().get().end.line,
-                                            n.getNameAsString(),
-                                            n.asMethodDeclaration(),
-                                            javaFile.getAbsolutePath()));
-                                    break;
-                                }
-                            }
-                        }
-                    }
+    public void findMethods(NodeList childNodes, File file, boolean withNamespace) throws FileNotFoundException {
+        Node includeNode = null;
+        Node namespaceNode = null;
+        Node macroNode = null;
+        for (int i = 0; i < childNodes.getLength(); ++i) {
+            Node node = childNodes.item(i);
+
+            if (withNamespace) {
+                if (node.getNodeName().equals("namespace")) {
+                    namespaceNode = node;
                 }
-            }.visit(StaticJavaParser.parse(javaFile), null);
-        } catch (ParseProblemException e) {
-            return new LinkedList<>();
+
+                if (node.getTextContent().contains("gtest/gtest.h") || node.getTextContent().contains("gmock/gmock.h")) {
+                    includeNode = node;
+                }
+            } else {
+                if (node.getTextContent().contains("TEST")) {
+                    macroNode = node;
+                }
+            }
+
+            if (withNamespace) {
+                if (includeNode != null && namespaceNode != null) {
+                    List<TestMethod> testMethods = gatherAllTestMethodsFromFileWithNamespace(new LinkedList<>(), file, namespaceNode);
+                    if (testMethods.size() > 0) {
+                        testClasses.add(new TestClass(testMethods, namespaceNode.getTextContent(), file.getAbsolutePath()));
+                    }
+                    includeNode = null;
+                    namespaceNode = null;
+                    break;
+                }
+            }
+            else {
+                if (node.getNodeName().equals("block")) {
+                    List<TestMethod> testMethods = gatherAllTestMethodsFromFileWithoutNamespace(new LinkedList<>(), file, node, macroNode);
+                    if (testMethods.size() > 0) {
+                        testClasses.add(new TestClass(testMethods, node.getTextContent(), file.getAbsolutePath()));
+                    }
+                    macroNode = null;
+                }
+            }
+        }
+    }
+
+    public List<TestMethod> gatherAllTestMethodsFromFileWithoutNamespace(List<TestMethod> testMethods, File javaFile, Node rootNode, Node macroNode) throws FileNotFoundException {
+        String methodDeclaration = "";
+        String methodName = "";
+        NodeList childNodes = rootNode.getChildNodes();
+
+        for (int i = 0; i < childNodes.getLength(); ++i) {
+            Node blockNode = childNodes.item(i);
+            methodDeclaration = blockNode.getTextContent();
+
+            if (!methodDeclaration.equals("")) {
+                String functionDeclaration = macroNode.getTextContent();
+                String[] splitted = functionDeclaration.split(",");
+                methodName = getFirstPartMethodName(splitted) + "=>" + getSecondPartMethodName(splitted);
+
+                testMethods.add(new TestMethod(methodName, blockNode, javaFile.getAbsolutePath()));
+                methodDeclaration = "";
+                methodName = "";
+            }
         }
         return testMethods;
+    }
+
+    public List<TestMethod> gatherAllTestMethodsFromFileWithNamespace(List<TestMethod> testMethods, File javaFile, Node rootNode) throws FileNotFoundException {
+        String methodDeclaration = "";
+        String methodName = "";
+        NodeList childNodes = rootNode.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); ++i) {
+            Node namespaceChildNode = childNodes.item(i);
+            if (namespaceChildNode.getNodeName().equals("block")) {
+                NodeList blockNodeList = namespaceChildNode.getChildNodes();
+                for (int j = 0; j < blockNodeList.getLength(); ++j) {
+                    Node blockNode = blockNodeList.item(j);
+                    if (blockNode.getNodeName().equals("block")) {
+                        methodDeclaration = blockNode.getTextContent();
+                    } else if (blockNode.getNodeName().equals("macro") && blockNode.getTextContent().contains("TEST")) {
+                        String functionDeclaration = blockNode.getTextContent();
+                        String[] splitted = functionDeclaration.split(",");
+                        methodName = getFirstPartMethodName(splitted) + "=>" + getSecondPartMethodName(splitted);
+                    }
+
+                    if (!methodDeclaration.equals("") && !methodName.equals("")) {
+                        testMethods.add(new TestMethod(methodName, blockNode, javaFile.getAbsolutePath()));
+                        methodDeclaration = "";
+                        methodName = "";
+                    }
+                }
+            }
+        }
+        return testMethods;
+    }
+
+    private String getFirstPartMethodName(String[] splitted) {
+        StringBuilder stringBuilder = new StringBuilder();
+        boolean flag = false;
+
+        for (char ch : splitted[0].toCharArray()) {
+            if (flag) {
+                if (ch != ' ') {
+                    stringBuilder.append(ch);
+                }
+            }
+            if (ch == '(') {
+                flag = true;
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    private String getSecondPartMethodName(String[] splitted) {
+        StringBuilder stringBuilder = new StringBuilder();
+        boolean flag = true;
+
+        for (char ch : splitted[1].toCharArray()) {
+            if (ch == ')') {
+                flag = false;
+            }
+            if (flag) {
+                if (ch != ' ') {
+                    stringBuilder.append(ch);
+                }
+            }
+        }
+        return stringBuilder.toString();
     }
 
     public List<TestClass> getTestClasses() {
