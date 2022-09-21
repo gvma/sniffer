@@ -38,7 +38,7 @@ public class ProjectCrawler {
                 if (file.isDirectory()) {
                     run(file);
                 } else if (file.isFile()) {
-                    if (file.getName().endsWith(".java") && file.getName().equals("AssertionRouletteTest.java")) {
+                    if (file.getName().endsWith(".java")) {
                         Logger logger = Logger.getLogger(Sniffer.class.getName());
                         logger.info("Analyzing file " + file.getAbsolutePath());
 
