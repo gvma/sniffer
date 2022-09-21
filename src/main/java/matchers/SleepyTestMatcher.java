@@ -1,27 +1,32 @@
 package matchers;
 
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.visitor.TreeVisitor;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.TreeWalker;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Logger;
 
 public class SleepyTestMatcher extends SmellMatcher {
     @Override
     protected void match(TestClass testClass) {
-        for (TestMethod testMethod : testClass.getTestMethods()) {
-            for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-                List<Integer> lines = new LinkedList<>();
-                matchSleepyTest(node.getChildNodes(), lines);
-                if (!lines.isEmpty()) {
-                    write(testMethod.getTestFilePath(), "Sleepy Test", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
-                }
+      for (TestMethod testMethod : testClass.getTestMethods()) {
+        NodeList childrenMethods = testMethod.getMethodDeclaration().getChildNodes();
+        for (int i = 0; i < childrenMethods.getLength(); ++i) {
+          Node node = childrenMethods.item(i);
+          if(node.getNodeName().equals("block")) {
+            boolean hasSleepyTestSmell = matchSleepyTest(node.getChildNodes());
+            if (hasSleepyTestSmell) {
+              write(testMethod.getTestFilePath(), "Sleepy Test", testMethod.getMethodName(), new LinkedList<>().toString());
             }
+          }
         }
+      }
     }
 
     @Override
@@ -30,22 +35,27 @@ public class SleepyTestMatcher extends SmellMatcher {
         Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found sleepy test in method \"" + name + "\" in lines " + lines);
     }
 
-    private void matchSleepyTest(List<Node> nodeList, List<Integer> lines) {
-        for (Node n : nodeList) {
-            new TreeVisitor() {
-                @Override
-                public void process(Node node) {
-                    if (node.toString().contains("Thread.sleep(") || node.toString().contains("sleep(")) {
-                        if (isSleep(node.toString())) {
-                            if (node.getRange().isPresent()) {
-                                lines.add(node.getRange().get().begin.line);
-                            }
-                        }
-                    }
-                }
-            }.visitPreOrder(n);
+  private boolean matchSleepyTest(NodeList nodeList) {
+    for (int i = 0; i < nodeList.getLength(); ++i) {
+      Node root = nodeList.item(i);
+      if(root.getNodeName().equals("block_content")) {
+        NodeList childrenBlockContent = root.getChildNodes();
+        for(int k = 0; k < childrenBlockContent.getLength(); ++k) {
+          Node childBlockContent = childrenBlockContent.item(k);
+          DocumentTraversal traversal = (DocumentTraversal) childBlockContent.getOwnerDocument();
+          TreeWalker iterator = traversal.createTreeWalker(childBlockContent, NodeFilter.SHOW_ALL, null, false);
+          Node node = null;
+          while ((node = iterator.nextNode()) != null) {
+            String textContent = node.getTextContent().trim();
+            if(textContent.contains("sleep(") || textContent.contains("Thread.sleep(")) {
+              return true;
+            }
+          }
         }
+      }
     }
+    return false;
+  }
 
     private boolean isSleep(String str) {
         char[] sleepString = {'s', 'l', 'e', 'e', 'p'};

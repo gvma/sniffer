@@ -1,40 +1,37 @@
 package matchers;
 
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.visitor.TreeVisitor;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.TreeWalker;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class DuplicateAssertMatcher extends SmellMatcher {
-    @Override
-    protected void match(TestClass testClass) {
-        for (TestMethod testMethod : testClass.getTestMethods()) {
-            for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-                List<Integer> lines = new LinkedList<>();
-                Map<String, List<Integer>> allAsserts = new HashMap<>();
-                getAllAsserts(node.getChildNodes(), allAsserts);
-                for (Map.Entry<String, List<Integer>> entry : allAsserts.entrySet()) {
-                    if (entry.getValue().size() > 1) {
-                        for (Integer line : entry.getValue()) {
-                            if (!lines.contains(line)) {
-                                lines.add(line);
-                            }
-                        }
-                    }
-                }
-                if (!lines.isEmpty()) {
-                    write(testMethod.getTestFilePath(), "Duplicate Assert", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
-                }
+
+  @Override
+  protected void match(TestClass testClass) {
+    for (TestMethod testMethod : testClass.getTestMethods()) {
+      NodeList childrenMethods = testMethod.getMethodDeclaration().getChildNodes();
+      for (int i = 0; i < childrenMethods.getLength(); ++i) {
+        Node node = childrenMethods.item(i);
+        if(node.getNodeName().equals("block")) {
+          Map<String, Integer> allAsserts = new HashMap<>();
+          getAllAsserts(node.getChildNodes(), allAsserts);
+          for (Map.Entry<String, Integer> entry : allAsserts.entrySet()) {
+            if (entry.getValue() > 1) {
+              write(testMethod.getTestFilePath(), "Duplicate Assert", testMethod.getMethodName(), new LinkedList<>().toString());
             }
+          }
         }
+      }
     }
+  }
 
     @Override
     public void write(String filePath, String testSmell, String name, String lines) {
@@ -42,29 +39,30 @@ public class DuplicateAssertMatcher extends SmellMatcher {
         Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found duplicate assert in method \"" + name + "\" in lines " + lines);
     }
 
-    private void getAllAsserts(List<Node> nodeList, Map<String, List<Integer>> allAsserts) {
-        List<Node> nodes = new LinkedList<>();
-        for (Node node : nodeList) {
-            new TreeVisitor() {
-                @Override
-                public void process(Node node) {
-                    if (node.getRange().isPresent()) {
-                        if (node.getMetaModel().getTypeName().equals("ExpressionStmt")) {
-                            if (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert")) {
-                                if (node.getRange().isPresent()) {
-                                    allAsserts.computeIfAbsent(node.toString().trim(), k -> new LinkedList<>());
-                                    List<Integer> lines = allAsserts.get(node.toString());
-                                    if (!lines.contains(node.getRange().get().begin.line)) {
-                                        nodes.add(node);
-                                        lines.add(node.getRange().get().begin.line);
-                                    }
-                                    allAsserts.put(node.toString().trim(), lines);
-                                }
-                            }
-                        }
-                    }
+  private void getAllAsserts(NodeList nodeList, Map<String, Integer> allAsserts) {
+    for (int i = 0; i < nodeList.getLength(); ++i) {
+      Node root = nodeList.item(i);
+      if(root.getNodeName().equals("block_content")) {
+        NodeList childrenBlockContent = root.getChildNodes();
+        for(int k = 0; k < childrenBlockContent.getLength(); ++k) {
+          Node childBlockContent = childrenBlockContent.item(k);
+          if (childBlockContent.getNodeName().equals("expr_stmt")) {
+            DocumentTraversal traversal = (DocumentTraversal) childBlockContent.getOwnerDocument();
+            TreeWalker iterator = traversal.createTreeWalker(childBlockContent, NodeFilter.SHOW_ALL, null, false);
+            Node node = null;
+            while ((node = iterator.nextNode()) != null) {
+              String textContent = node.getTextContent().trim();
+              if (node.getNodeName().equals("expr") && (textContent.startsWith("assert") || textContent.startsWith("Assert"))) {
+                if (allAsserts.containsKey(node.getTextContent())) {
+                  allAsserts.put(node.getTextContent(), allAsserts.get(node.getTextContent()) + 1);
+                } else {
+                  allAsserts.put(node.getTextContent(), 1);
                 }
-            }.visitPreOrder(node);
+              }
+            }
+          }
         }
+      }
     }
+  }
 }

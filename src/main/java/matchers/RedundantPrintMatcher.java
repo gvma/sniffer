@@ -1,28 +1,30 @@
 package matchers;
 
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.visitor.TreeVisitor;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Logger;
 
 public class RedundantPrintMatcher extends SmellMatcher {
+
     @Override
     protected void match(TestClass testClass) {
-        for (TestMethod testMethod : testClass.getTestMethods()) {
-            for (Node node : testMethod.getMethodDeclaration().getChildNodes()) {
-                List<Integer> lines = new LinkedList<>();
-                matchRedundantPrint(node.getChildNodes(), lines);
-                if (!lines.isEmpty()) {
-                    write(testMethod.getTestFilePath(), "Redundant Print", testMethod.getMethodDeclaration().getNameAsString(), lines.toString());
-
-                }
+      for (TestMethod testMethod : testClass.getTestMethods()) {
+        NodeList childrenMethods = testMethod.getMethodDeclaration().getChildNodes();
+        for (int i = 0; i < childrenMethods.getLength(); ++i) {
+          Node node = childrenMethods.item(i);
+          if(node.getNodeName().equals("block")) {
+            boolean hasRedundantPrintSmell = matchRedundantPrint(node.getChildNodes());
+            if (hasRedundantPrintSmell) {
+              write(testMethod.getTestFilePath(), "Redundant Print", testMethod.getMethodName(), new LinkedList<>().toString());
             }
+          }
         }
+      }
     }
 
     @Override
@@ -31,20 +33,19 @@ public class RedundantPrintMatcher extends SmellMatcher {
         Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found redundant print in method \"" + name + "\" in lines " + lines);
     }
 
-    private void matchRedundantPrint(List<Node> nodeList, List<Integer> lines) {
-        for (Node n : nodeList) {
-            new TreeVisitor() {
-                @Override
-                public void process(Node node) {
-                    if (node.toString().matches("System.out")) {
-                        if (node.getRange().isPresent()) {
-                            if (!lines.contains(node.getRange().get().begin.line)) {
-                                lines.add(node.getRange().get().begin.line);
-                            }
-                        }
-                    }
-                }
-            }.visitPreOrder(n);
+    private Boolean matchRedundantPrint(NodeList nodeList) {
+      for (int i = 0; i < nodeList.getLength(); ++i) {
+        Node root = nodeList.item(i);
+        if(root.getNodeName().equals("block_content")) {
+          NodeList childrenBlockContent = root.getChildNodes();
+          for(int k = 0; k < childrenBlockContent.getLength(); ++k) {
+            Node childBlockContent = childrenBlockContent.item(k);
+            if(childBlockContent.getTextContent().contains("System.out")) {
+              return true;
+            }
+          }
         }
+      }
+      return false;
     }
 }

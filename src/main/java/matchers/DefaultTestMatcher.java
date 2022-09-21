@@ -4,17 +4,17 @@ import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
+import java.util.LinkedList;
 import java.util.logging.Logger;
 
 public class DefaultTestMatcher extends SmellMatcher {
     @Override
     protected void match(TestClass testClass) {
-        if (testClass.getClassName().startsWith("ExampleUnitTest") || testClass.getClassName().startsWith("ExampleInstrumentedTest")) {
-            for (TestMethod testMethod : testClass.getTestMethods()) {
-                if (testMethod.getMethodName().equals("addition_isCorrect") || testMethod.getMethodName().equals("useAppContext")) {
-                    write(testClass.getAbsolutePath(), "Default Test", testClass.getClassName(), "");
-                }
-            }
+      for (TestMethod testMethod : testClass.getTestMethods()) {
+          String methodName = testMethod.getMethodName();
+          if(methodName.equals("addition_isCorrect") || methodName.equals("useAppContext")) {
+            write(testMethod.getTestFilePath(), "Default Test", testMethod.getMethodName(), new LinkedList<>().toString());
+          }
         }
     }
 

@@ -48,15 +48,27 @@ public class MagicNumberTest {
     }
 
     @Test
-    public void magicNumberFalse1() {
-        int a = 0;
-        assertEquals(a, a, a);
+    public void magicNumberTrue4() { // -> Conferir se esse deveria ser true ou false.
+        double a = 1.0;
+        assertEquals(Math.pow(1, 1), a, a);
     }
 
     @Test
-    public void magicNumberTrue4() {
-        double a = 1.0;
-        assertEquals(Math.pow(1, 1), a, a);
+    public void magicNumberTrue5() {
+        Integer a = 1;
+        assertEquals(1, a.intValue());
+    }
+    @Test
+    public void magicNumberTrue6() {
+        List<Integer> list = new LinkedList<>();
+        list.add(1);
+        assertEquals(1, list.get(0), 1.0);
+    }
+
+    @Test
+    public void magicNumberFalse1() {
+        int a = 0;
+        assertEquals(a, a, a);
     }
 
     @Test
@@ -77,20 +89,18 @@ public class MagicNumberTest {
     }
 
     @Test
-    public void magicNumberTrue5() {
-        int[] a = {1}, b = {1};
-        assertEquals(a[0], b[0]);
-    }
-
-    @Test
-    public void magicNumberTrue6() {
-        Integer a = 1;
-        assertEquals(1, a.intValue());
-    }
-
-    @Test
     public void magicNumberFalse5() {
         Boolean b = true;
         assertTrue(b.booleanValue());
+    }
+
+    @Test
+    public void magicNumberFalse6() {
+        int[] a = {1}, b = {1};
+        assertEquals(a[0], b[0]);
+    }
+    @Test
+    public void magicNumberFalse7() {
+        assertEquals("sadasda", "sadasda");
     }
 }

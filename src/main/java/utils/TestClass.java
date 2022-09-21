@@ -1,27 +1,35 @@
 package utils;
 
+import org.w3c.dom.NodeList;
+
 import java.util.List;
 
 public class TestClass {
-    private final String className;
+//    private final String className;
     private final List<TestMethod> testMethods;
     private final String classContent;
     private final String absolutePath;
 
-    public TestClass(List<TestMethod> testMethods, String className, String classContent, String absolutePath) {
+    private final NodeList fileContentXml;
+
+    public TestClass(List<TestMethod> testMethods, String classContent, String absolutePath, NodeList fileContentXml) {
         this.testMethods = testMethods;
-        this.className = className;
         this.classContent = classContent;
         this.absolutePath = absolutePath;
+        this.fileContentXml = fileContentXml;
     }
 
     public List<TestMethod> getTestMethods() {
         return testMethods;
     }
 
-    public String getClassName() {
-        return className;
+    public NodeList getFileContentXml() {
+        return fileContentXml;
     }
+
+    //    public String getClassName() {
+//        return className;
+//    }
 
     public String getClassContent() { return classContent; }
 
@@ -30,7 +38,7 @@ public class TestClass {
     @Override
     public String toString() {
         return "TestClass{" +
-                "className='" + className + '\'' +
+//                "className='" + className + '\'' +
                 ", testMethods=" + testMethods +
                 ", classContent='" + classContent + '\'' +
                 '}';

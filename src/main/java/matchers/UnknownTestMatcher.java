@@ -1,12 +1,15 @@
 package matchers;
 
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.visitor.TreeVisitor;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.TreeWalker;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
 
-import java.util.List;
+import java.util.LinkedList;
 import java.util.logging.Logger;
 
 public class UnknownTestMatcher extends SmellMatcher {
@@ -15,13 +18,19 @@ public class UnknownTestMatcher extends SmellMatcher {
 
     @Override
     protected void match(TestClass testClass) {
-        for (TestMethod testMethod : testClass.getTestMethods()) {
-            matchUnknownTest(testMethod.getMethodDeclaration().getChildNodes());
-            if (assertionCount == 0) {
-                write(testMethod.getTestFilePath(), "Unknown Test", testMethod.getMethodDeclaration().getNameAsString(), Integer.toString(testMethod.getBeginLine()));
+      for (TestMethod testMethod : testClass.getTestMethods()) {
+        NodeList childrenMethods = testMethod.getMethodDeclaration().getChildNodes();
+        for (int i = 0; i < childrenMethods.getLength(); ++i) {
+          Node node = childrenMethods.item(i);
+          if(node.getNodeName().equals("block")) {
+            matchUnknownTest(node.getChildNodes());
+            if (this.assertionCount == 0) {
+              write(testMethod.getTestFilePath(), "Unknown Test", testMethod.getMethodName(), new LinkedList<>().toString());
             }
-            assertionCount = 0;
+            this.assertionCount = 0;
+          }
         }
+      }
     }
 
     @Override
@@ -30,23 +39,25 @@ public class UnknownTestMatcher extends SmellMatcher {
         Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found assertion roulette in method \"" + name + "\" in lines " + lines);
     }
 
-    private void matchUnknownTest(List<Node> nodeList) {
-        for (Node node : nodeList) {
-            if (node.getMetaModel().getTypeName().equals("NormalAnnotationExpr")) {
-                if (node.toString().contains("expected")) {
-                    assertionCount++;
-                }
+
+    private void matchUnknownTest(NodeList nodeList) {
+      for (int i = 0; i < nodeList.getLength(); ++i) {
+        Node root = nodeList.item(i);
+        if(root.getNodeName().equals("block_content")) {
+          NodeList childrenBlockContent = root.getChildNodes();
+          for(int k = 0; k < childrenBlockContent.getLength(); ++k) {
+            Node childBlockContent = childrenBlockContent.item(k);
+            DocumentTraversal traversal = (DocumentTraversal) childBlockContent.getOwnerDocument();
+            TreeWalker iterator = traversal.createTreeWalker(childBlockContent, NodeFilter.SHOW_ALL, null, false);
+            Node node = null;
+            while ((node = iterator.nextNode()) != null) {
+              String textContent = node.getTextContent().trim();
+              if (node.getNodeName().equals("expr") && (textContent.startsWith("assert") || textContent.startsWith("Assert"))) {
+                this.assertionCount += 1;
+              }
             }
-            new TreeVisitor() {
-                @Override
-                public void process(Node node) {
-                    if (node.toString().trim().startsWith("assert") || node.toString().trim().startsWith("Assert")) {
-                        assertionCount++;
-                    } else if (node.toString().trim().startsWith("fail")) {
-                        assertionCount++;
-                    }
-                }
-            }.visitPreOrder(node);
+          }
         }
+      }
     }
 }
