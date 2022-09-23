@@ -13,18 +13,20 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class DuplicateAssertMatcher extends SmellMatcher {
+  private Map<String, Integer> allAsserts = new HashMap<>();
 
   @Override
   protected void match(TestClass testClass) {
     for (TestMethod testMethod : testClass.getTestMethods()) {
-      NodeList childrenMethods = testMethod.getMethodDeclaration().getChildNodes();
-      Map<String, Integer> allAsserts = new HashMap<>();
-      getAllAsserts(childrenMethods, allAsserts);
-      for (Map.Entry<String, Integer> entry : allAsserts.entrySet()) {
-        if (entry.getValue() > 1) {
+      Node root = testMethod.getMethodDeclaration();
+      getAllAssertsRecursive(root);
+      for (Map.Entry<String, Integer> entry : this.allAsserts.entrySet()) {
+        boolean hasDuplicateAssertSmell = entry.getValue() > 1;
+        if (hasDuplicateAssertSmell) {
           write(testMethod.getTestFilePath(), "Duplicate Assert", testMethod.getMethodName(), new LinkedList<>().toString());
         }
       }
+      this.allAsserts.clear();
     }
   }
 
@@ -32,6 +34,23 @@ public class DuplicateAssertMatcher extends SmellMatcher {
   public void write(String filePath, String testSmell, String name, String lines) {
     OutputWriter.getInstance().write(filePath, testSmell, name, lines);
     Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found duplicate assert in method \"" + name + "\" in lines " + lines);
+  }
+
+  private void getAllAssertsRecursive(Node root) {
+    NodeList rootChildren = root.getChildNodes();
+    Node rootChild;
+    for(int i = 0; i < rootChildren.getLength(); ++i) {
+      rootChild = rootChildren.item(i);
+      String textContent = rootChild.getTextContent().trim();
+      if (rootChild.getNodeName().equals("expr") && (textContent.startsWith("EXPECT_") || textContent.startsWith("ASSERT_"))) {
+        if (this.allAsserts.containsKey(rootChild.getTextContent())) {
+          this.allAsserts.put(rootChild.getTextContent(), allAsserts.get(rootChild.getTextContent()) + 1);
+        } else {
+          this.allAsserts.put(rootChild.getTextContent(), 1);
+        }
+      }
+      getAllAssertsRecursive(rootChild);
+    }
   }
 
   private void getAllAsserts(NodeList nodeList, Map<String, Integer> allAsserts) {
@@ -43,7 +62,6 @@ public class DuplicateAssertMatcher extends SmellMatcher {
       while ((node = iterator.nextNode())!=null){
         String textContent = node.getTextContent().trim();
         if (node.getNodeName().equals("expr") && (textContent.startsWith("EXPECT_") || textContent.startsWith("ASSERT_"))) {
-//          System.out.println("Node: " + node.getNodeName() + " content: " + textContent);
           if (allAsserts.containsKey(node.getTextContent())) {
             allAsserts.put(node.getTextContent(), allAsserts.get(node.getTextContent()) + 1);
           } else {
