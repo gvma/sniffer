@@ -8,10 +8,10 @@ import org.w3c.dom.traversal.TreeWalker;
 import utils.OutputWriter;
 import utils.TestClass;
 import utils.TestMethod;
+import utils.Utils;
 
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class ConditionalTestMatcher extends SmellMatcher {
@@ -22,7 +22,7 @@ public class ConditionalTestMatcher extends SmellMatcher {
             NodeList methodChilds = testMethod.getMethodDeclaration().getChildNodes();
             for (int i = 0; i < methodChilds.getLength(); ++i) {
                 Node node = methodChilds.item(i);
-                Set<Integer> lines = new HashSet<>();
+                List<Integer> lines = new LinkedList<>();
                 matchConditionalTest(node.getChildNodes(), lines);
                 if (lines.size() != 0) {
                     write(testMethod.getTestFilePath(), "Conditional Test", testMethod.getMethodName(), new LinkedList<>().toString());
@@ -37,7 +37,7 @@ public class ConditionalTestMatcher extends SmellMatcher {
         Logger.getLogger(AssertionRouletteMatcher.class.getName()).info("Found conditional test in method \"" + name + "\" in lines " + lines);
     }
 
-    private void matchConditionalTest(NodeList nodeList, Set<Integer> lines) {
+    private void matchConditionalTest(NodeList nodeList, List<Integer> lines) {
         for (int i = 0; i < nodeList.getLength(); ++i) {
             Node root = nodeList.item(i);
             if (root.getNodeName().equals("if_stmt") || root.getNodeName().equals("for") || root.getNodeName().equals("while") || root.getNodeName().equals("do")) {
@@ -48,7 +48,7 @@ public class ConditionalTestMatcher extends SmellMatcher {
                     TreeWalker iterator = traversal.createTreeWalker(conditional, NodeFilter.SHOW_ALL, null, false);
                     Node c = null;
                     while ((c = iterator.nextNode()) != null) {
-                        if (c.getNodeName().equals("expr") && c.getTextContent().contains("EXPECT_")) {
+                        if (Utils.isExpect(c)) {
                             lines.add(0);
                         }
                     }
