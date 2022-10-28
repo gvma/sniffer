@@ -1,6 +1,5 @@
 import github.GithubRepositoryClone;
 import matchers.Sniffer;
-
 import java.io.File;
 import java.util.Objects;
 

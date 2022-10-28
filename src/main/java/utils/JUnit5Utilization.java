@@ -19,7 +19,7 @@ public class JUnit5Utilization {
     private final ProjectCrawler projectCrawler;
     private final Set<String> JUnit5NewFeatures;
 
-    public JUnit5Utilization(String projectPath) throws IOException, ParserConfigurationException, SAXException {
+    public JUnit5Utilization(String projectPath) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
         OutputWriter.getInstance().setOutputFile(projectPath);
         this.projectCrawler = new ProjectCrawler(projectPath);
         projectCrawler.run();
@@ -27,32 +27,32 @@ public class JUnit5Utilization {
         addNewFeatures();
     }
 
-    public void findJUnit5Imports() throws IOException {
-        for (TestClass testClass : projectCrawler.getTestClasses()) {
-            CompilationUnit cu = StaticJavaParser.parse(testClass.getClassContent());
-            Set<String> usedFromJUnit5 = new HashSet<>();
-            for (ImportDeclaration importDeclaration : cu.getImports()) {
-                String importName = importDeclaration.getName().asString();
-                if (importName.contains("org.junit.jupiter")) {
-                    String[] splitted = importName.split("\\.");
-                    usedFromJUnit5.add(splitted[splitted.length - 1]);
-                }
-            }
-            for (String s : usedFromJUnit5) {
-                if (JUnit5NewFeatures.contains(s)) {
-                    new TreeVisitor() {
-                        @Override
-                        public void process(Node node) {
-                            if (node.toString().equals(s)) {
-                                OutputWriter.getInstance().write(testClass.getAbsolutePath(), s);
-                            }
-                        }
-                    }.visitPreOrder(cu.findRootNode());
-                }
-            }
-        }
-        OutputWriter.csvWriter.close();
-    }
+//    public void findJUnit5Imports() throws IOException {
+//        for (TestClass testClass : projectCrawler.getTestClasses()) {
+//            CompilationUnit cu = StaticJavaParser.parse(testClass.getClassContent());
+//            Set<String> usedFromJUnit5 = new HashSet<>();
+//            for (ImportDeclaration importDeclaration : cu.getImports()) {
+//                String importName = importDeclaration.getName().asString();
+//                if (importName.contains("org.junit.jupiter")) {
+//                    String[] splitted = importName.split("\\.");
+//                    usedFromJUnit5.add(splitted[splitted.length - 1]);
+//                }
+//            }
+//            for (String s : usedFromJUnit5) {
+//                if (JUnit5NewFeatures.contains(s)) {
+//                    new TreeVisitor() {
+//                        @Override
+//                        public void process(Node node) {
+//                            if (node.toString().equals(s)) {
+//                                OutputWriter.getInstance().write(testClass.getAbsolutePath(), s);
+//                            }
+//                        }
+//                    }.visitPreOrder(cu.findRootNode());
+//                }
+//            }
+//        }
+//        OutputWriter.csvWriter.close();
+//    }
 
     public void addNewFeatures() {
         JUnit5NewFeatures.add("ParameterizedTest");

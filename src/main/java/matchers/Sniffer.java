@@ -5,21 +5,16 @@ import org.xml.sax.SAXException;
 import projectCrawler.ProjectCrawler;
 import utils.OutputWriter;
 import utils.TestClass;
-
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 public class Sniffer {
 
     private final ProjectCrawler projectCrawler;
 
-    public Sniffer(String projectPath) throws IOException, ParserConfigurationException, SAXException {
+    public Sniffer(String projectPath) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
         OutputWriter.getInstance().setOutputFile(projectPath);
         this.projectCrawler = new ProjectCrawler(projectPath);
         projectCrawler.run();
