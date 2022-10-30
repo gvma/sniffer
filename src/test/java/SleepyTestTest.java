@@ -11,7 +11,7 @@ public class SleepyTestTest {
 
     @Test
     public void sleepyTest1() throws InterruptedException {
-        sleep(1);
+        Thread.sleep(1);
     }
 
     @Test

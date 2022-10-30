@@ -18,19 +18,13 @@ public class AssertionRouletteMatcher extends SmellMatcher {
 
   @Override
   protected void match(TestClass testClass) {
-    for (TestMethod testMethod : testClass.getTestMethods()) {
-      NodeList childrenMethods = testMethod.getMethodDeclaration().getChildNodes();
-      for (int i = 0; i < childrenMethods.getLength(); ++i) {
-        Node node = childrenMethods.item(i);
-        if(node.getNodeName().equals("block")) {
-          matchAssertionRoulette(node.getChildNodes());
-          if (this.assertionCount >= 2) {
-            write(testMethod.getTestFilePath(), "Assertion Roulette", testMethod.getMethodName(), new LinkedList<>().toString());
-          }
-          this.assertionCount = 0;
+      for (TestMethod testMethod : testClass.getTestMethods()) {
+        Node root = testMethod.getMethodDeclaration();
+        boolean hasAssertionRouletteSmell = matchAssertionRoulette(root);
+        if (hasAssertionRouletteSmell) {
+          write(testMethod.getTestFilePath(), "Assertion Roulette", testMethod.getMethodName(), "[]");
         }
       }
-    }
   }
 
   @Override
@@ -58,5 +52,23 @@ public class AssertionRouletteMatcher extends SmellMatcher {
         }
       }
     }
+  }
+
+  private boolean matchAssertionRoulette(Node root) {
+    int assertionCount = 0;
+    DocumentTraversal traversal = (DocumentTraversal) root.getOwnerDocument();
+    TreeWalker iterator = traversal.createTreeWalker(root, NodeFilter.SHOW_ALL, null, false);
+    Node node = null;
+    while ((node = iterator.nextNode())!=null){
+      String textContent = node.getTextContent().trim();
+      if (node.getNodeName().equals("expr") && (textContent.toLowerCase().startsWith("assert") || textContent.toLowerCase().startsWith("fail"))) {
+//        String[] getCommentsFromExpect = textContent.split("<<");
+//        boolean hasComments = getCommentsFromExpect.length == 2;
+//        if(!hasComments) {
+//          assertionCount++;
+//        }
+      }
+    }
+    return assertionCount >= 2;
   }
 }

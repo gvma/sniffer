@@ -19,7 +19,7 @@ public class Sniffer {
 
     private final ProjectCrawler projectCrawler;
 
-    public Sniffer(String projectPath) throws IOException, ParserConfigurationException, SAXException {
+    public Sniffer(String projectPath) throws IOException, ParserConfigurationException, SAXException, InterruptedException {
         OutputWriter.getInstance().setOutputFile(projectPath);
         this.projectCrawler = new ProjectCrawler(projectPath);
         projectCrawler.run();

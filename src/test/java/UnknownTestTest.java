@@ -4,7 +4,6 @@ public class UnknownTestTest {
 
     @Test
     public void unknownTestTrue1() {
-
     }
 
     @Test
