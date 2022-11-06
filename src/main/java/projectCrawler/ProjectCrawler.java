@@ -4,9 +4,6 @@ import matchers.Sniffer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.traversal.DocumentTraversal;
-import org.w3c.dom.traversal.NodeFilter;
-import org.w3c.dom.traversal.TreeWalker;
 import org.xml.sax.SAXException;
 import projectCrawler.positionalXMLReader.PositionalXMLReader;
 import utils.TestClass;
@@ -14,11 +11,10 @@ import utils.TestMethod;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ProjectCrawler {
@@ -67,7 +63,6 @@ public class ProjectCrawler {
               Node rootNode = doc.getFirstChild();
               findMethods(rootNode, filePath);
               if (this.testMethods.size() > 0) {
-//                                List<TestMethod> testMethodsList = new LinkedList<>(this.checkIntegrityOfMethods());
                 List<TestMethod> testMethodsList = this.testMethods.stream().collect(Collectors.toList());
                 for (TestMethod index : this.testMethods) {
                   logger.info("Find method: " + index.getMethodName());
@@ -84,81 +79,6 @@ public class ProjectCrawler {
         }
       }
     }
-  }
-  // Ainda precisa adaptar para java.
-  private List<TestMethod> checkIntegrityOfMethods() {
-    List<TestMethod> testMethodsList = this.testMethods.stream().collect(Collectors.toList());
-    List<Integer> removeIndex = new ArrayList<>();
-    List<TestMethod> newNodesToAdd = new LinkedList<>();
-    for (int i = 0; i < testMethodsList.size(); ++i) {
-      // TEST.*\(.*\)\s*{\X*}
-      String regexPattern = "TEST.*\\(.*\\)\\s*\\{";
-      Pattern pattern = Pattern.compile(regexPattern);
-      Matcher m = pattern.matcher(testMethodsList.get(i).getMethodDeclaration().getTextContent());
-      boolean hasExtraTestMethods = m.find();
-      if (hasExtraTestMethods) {
-        TestMethod currentTestMethod = testMethodsList.get(i);
-        removeIndex.add(i);
-        Node newNode = removeExtraTestMethods(currentTestMethod.getMethodDeclaration());
-        boolean isFreakMethod = removeFreakTestMethods(newNode);
-        if (!isFreakMethod) {
-          TestMethod newTestMethod = new TestMethod(currentTestMethod.getMethodName(), newNode, currentTestMethod.getTestFilePath());
-          newNodesToAdd.add(newTestMethod);
-          continue;
-        }
-      }
-      boolean isFreakMethod = removeFreakTestMethods(testMethodsList.get(i).getMethodDeclaration());
-      if (isFreakMethod) {
-        removeIndex.add(i);
-      }
-    }
-    removeIndex.sort(Collections.reverseOrder());
-    for (Integer index : removeIndex) {
-      TestMethod remove = testMethodsList.get(index);
-      Logger.getLogger(Sniffer.class.getName()).info("Removing freak method: " + remove.getMethodName());
-      testMethodsList.remove(remove);
-    }
-    testMethodsList.addAll(newNodesToAdd);
-    return testMethodsList;
-  }
-
-  // Ainda precisa adaptar para java.
-  private Node removeExtraTestMethods(Node root) {
-    DocumentTraversal traversal = (DocumentTraversal) root.getFirstChild().getOwnerDocument();
-    TreeWalker iterator = traversal.createTreeWalker(root, NodeFilter.SHOW_ALL, null, false);
-    Node node = null;
-    boolean isMacro = false;
-    Node macroNode = null;
-    while ((node = iterator.nextNode()) != null) {
-      if (node.getNodeName().equals("macro") && node.getTextContent().startsWith("TEST")) {
-        macroNode = node;
-        isMacro = true;
-      }
-      if (isMacro && node.getNodeName().equals("block")) {
-        isMacro = false;
-        Node parent = node.getParentNode();
-        parent.removeChild(node);
-      }
-    }
-    if (macroNode != null) {
-      Node parent = macroNode.getParentNode();
-      parent.removeChild(macroNode);
-    }
-    return root;
-  }
-
-  private boolean removeFreakTestMethods(Node root) {
-    String rootString = root.getTextContent();
-    Stack<Boolean> stack = new Stack<>();
-    for (int i = 0; i < rootString.length(); ++i) {
-      if (rootString.charAt(i) == '{') {
-        stack.push(true);
-      }
-      if (!stack.isEmpty() && rootString.charAt(i) == '}') {
-        stack.pop();
-      }
-    }
-    return !stack.isEmpty();
   }
 
   private void findMethods(Node rootNode, String filePath) {
