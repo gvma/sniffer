@@ -8,14 +8,22 @@ public class TestClass {
   private final List<TestMethod> testMethods;
   private final String classContent;
   private final String absolutePath;
-
   private final NodeList fileContentXml;
+  private String className  = "";
 
   public TestClass(List<TestMethod> testMethods, String classContent, String absolutePath, NodeList fileContentXml) {
     this.testMethods = testMethods;
     this.classContent = classContent;
     this.absolutePath = absolutePath;
     this.fileContentXml = fileContentXml;
+  }
+
+  public TestClass(List<TestMethod> testMethods, String classContent, String absolutePath, NodeList fileContentXml, String className) {
+    this.testMethods = testMethods;
+    this.classContent = classContent;
+    this.absolutePath = absolutePath;
+    this.fileContentXml = fileContentXml;
+    this.className = className;
   }
 
   public List<TestMethod> getTestMethods() {
@@ -34,11 +42,16 @@ public class TestClass {
     return absolutePath;
   }
 
+  public String getClassName() { return className; }
+
+  public void setClassName(String className) { this.className = className; }
+
   @Override
   public String toString() {
     return "TestClass{" +
             ", testMethods=" + testMethods +
             ", classContent='" + classContent + '\'' +
+            ", className='" + className + '\'' +
             '}';
   }
 }

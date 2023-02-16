@@ -45,6 +45,7 @@ public class ProjectCrawler {
               logger.info("Analyzing file " + file.getAbsolutePath());
               String filePath = file.getAbsolutePath();
               String xmlFilePath = filePath + ".xml";
+              String className = file.getName().split(".java")[0];
               Runtime rt = Runtime.getRuntime();
               Process process = rt.exec(String.format("srcml %s -o %s", filePath, xmlFilePath));
               process.waitFor();
@@ -67,7 +68,7 @@ public class ProjectCrawler {
                 for (TestMethod index : this.testMethods) {
                   logger.info("Find method: " + index.getMethodName());
                 }
-                TestClass testClass = new TestClass(testMethodsList, rootNode.getTextContent(), file.getAbsolutePath(), rootNode.getChildNodes());
+                TestClass testClass = new TestClass(testMethodsList, rootNode.getTextContent(), file.getAbsolutePath(), rootNode.getChildNodes(), className);
                 this.testClasses.add(testClass);
                 this.testMethods.clear();
               }
