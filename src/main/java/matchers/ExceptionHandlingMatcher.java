@@ -38,10 +38,13 @@ public class ExceptionHandlingMatcher extends SmellMatcher {
     for (int i = 0; i < rootChildren.getLength(); ++i) {
       rootChild = rootChildren.item(i);
       if (rootChild.getNodeName().equals("try") || rootChild.getNodeName().equals("catch")) {
+        hasExceptionHandlingSmell.add(true);
         matchExceptionHandlingRecursive(rootChild, true, hasExceptionHandlingSmell);
       } else {
         String textContent = rootChild.getTextContent().trim();
-        if (isInsideTryCatch && rootChild.getNodeName().equals("expr") && (textContent.toLowerCase().startsWith("assert") || textContent.toLowerCase().startsWith("fail"))) {
+        if (isInsideTryCatch && rootChild.getNodeName().equals("expr") &&
+                (textContent.toLowerCase().startsWith("assert") || textContent.toLowerCase().startsWith("fail")) ||
+                (textContent.startsWith("EXPECT_") || textContent.startsWith("ASSERT_") || textContent.startsWith("FAIL_"))) {
           hasExceptionHandlingSmell.add(true);
         }
         matchExceptionHandlingRecursive(rootChild, isInsideTryCatch, hasExceptionHandlingSmell);

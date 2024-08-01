@@ -41,12 +41,10 @@ public class ConditionalTestMatcher extends SmellMatcher {
     for (int i = 0; i < rootChildren.getLength(); ++i) {
       rootChild = rootChildren.item(i);
       String textContent = rootChild.getTextContent().trim();
-      if (root.getNodeName().equals("if_stmt") || root.getNodeName().equals("for") || root.getNodeName().equals("while") || root.getNodeName().equals("do")) {
+      if (root.getNodeName().equals("if_stmt") || root.getNodeName().equals("for") || root.getNodeName().equals("foreach") || root.getNodeName().equals("while") || root.getNodeName().equals("do")) {
         matchConditionalTestRecursive(rootChild, true, hasConditionalSmell);
+        hasConditionalSmell.add(true);
       } else {
-        if (isInsideConditional && rootChild.getNodeName().equals("expr") && textContent.toLowerCase().startsWith("assert")) {
-          hasConditionalSmell.add(true);
-        }
         matchConditionalTestRecursive(rootChild, isInsideConditional, hasConditionalSmell);
       }
     }

@@ -36,7 +36,9 @@ public class UnknownTestMatcher extends SmellMatcher {
     Node node = null;
     while ((node = iterator.nextNode()) != null) {
       String textContent = node.getTextContent().trim();
-      if (node.getNodeName().equals("expr") && textContent.toLowerCase().startsWith("assert") || textContent.toLowerCase().startsWith("fail")) {
+      if ((node.getNodeName().equals("expr")|| node.getNodeName().equals("macro")) &&
+              (textContent.trim().toLowerCase().startsWith("assert") || textContent.toLowerCase().startsWith("fail")
+                      ||(textContent.startsWith("EXPECT_") || textContent.startsWith("ASSERT_")))) {
         assertionCount += 1;
       }
     }

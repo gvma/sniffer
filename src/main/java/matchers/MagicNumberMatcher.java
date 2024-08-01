@@ -47,7 +47,8 @@ public class MagicNumberMatcher extends SmellMatcher {
       while ((node = iterator.nextNode()) != null) {
         boolean isSameExpect = false;
         String textContent = node.getTextContent();
-        if (node.getNodeName().equals("expr") && textContent.toLowerCase().startsWith("assert")) {
+        if ((node.getNodeName().equals("expr") || node.getNodeName().equals("macro")) &&
+                (textContent.startsWith("EXPECT_") || textContent.startsWith("ASSERT_") || textContent.toLowerCase().startsWith("assert"))) {
           DocumentTraversal expectTraversal = (DocumentTraversal) nodeList.item(i).getOwnerDocument();
           TreeWalker expectIterator = expectTraversal.createTreeWalker(node, NodeFilter.SHOW_ALL, null, false);
           Node itNode = null;

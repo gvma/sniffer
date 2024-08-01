@@ -11,11 +11,11 @@ import utils.TestMethod;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class ProjectCrawler {
   private final List<TestClass> testClasses;
@@ -39,7 +39,7 @@ public class ProjectCrawler {
         if (file.isDirectory()) {
           run(file);
         } else if (file.isFile()) {
-          if (file.getName().endsWith(".java")) {
+          if (file.getName().endsWith(".cs") || file.getName().endsWith(".java") || file.getName().endsWith(".cpp") || file.getName().endsWith(".cc")) {
             Logger logger = Logger.getLogger(Sniffer.class.getName());
             try {
               logger.info("Analyzing file " + file.getAbsolutePath());
@@ -64,7 +64,7 @@ public class ProjectCrawler {
               Node rootNode = doc.getFirstChild();
               findMethods(rootNode, filePath);
               if (this.testMethods.size() > 0) {
-                List<TestMethod> testMethodsList = this.testMethods.stream().collect(Collectors.toList());
+                List<TestMethod> testMethodsList = new ArrayList<>(this.testMethods);
                 for (TestMethod index : this.testMethods) {
                   logger.info("Find method: " + index.getMethodName());
                 }
@@ -105,9 +105,9 @@ public class ProjectCrawler {
     NodeList annotationNodeList = functionNode.getChildNodes();
     for (int m = 0; m < annotationNodeList.getLength(); ++m) {
       Node nameNode = annotationNodeList.item(m);
-      if (nameNode != null && nameNode.getNodeName().equals("name")) {
+      if (nameNode != null && nameNode.getNodeName().equals("expr")) {
         Node testNode = nameNode.getFirstChild();
-        if (testNode != null && testNode.getTextContent().trim().equalsIgnoreCase("test")) {
+        if (testNode != null && testNode.getTextContent().trim().equalsIgnoreCase("fact")) {
           return true;
         }
       }
@@ -124,7 +124,7 @@ public class ProjectCrawler {
         boolean isTestMethod = false;
         for (int l = 0; l < functionNodeList.getLength(); ++l) {
           Node functionNode = functionNodeList.item(l);
-          if (functionNode != null && functionNode.getNodeName().equals("annotation")) {
+          if (functionNode != null && functionNode.getNodeName().equals("attribute")) {
             if (hasTestAnnotation(functionNode)) {
               isTestMethod = true;
             }
